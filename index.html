@@ -33,96 +33,6 @@
     }
 
     /* ==========================================================================
-       СТАРТОВАЯ ОБЛОЖКА
-       ========================================================================== */
-    #cover-screen {
-      position: fixed;
-      inset: 0;
-      background: #050608;
-      z-index: 500;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-    }
-
-    #cover-screen.hidden { display: none; }
-
-    .cover-poster {
-      width: 100%;
-      max-width: 440px;
-      height: 92vh;
-      max-height: 780px;
-      border-radius: 12px;
-      overflow: hidden;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      padding: 32px 24px;
-      text-align: center;
-      box-shadow: 0 25px 70px rgba(0,0,0,0.9);
-      border: 1px solid rgba(255,255,255,0.08);
-      /* Положите cover.png рядом с index.html; без него останется тёмный градиент */
-      background:
-        linear-gradient(to bottom, rgba(5,6,8,0.15) 0%, rgba(5,6,8,0.55) 55%, rgba(5,6,8,0.97) 85%),
-        url('cover.png') center/cover no-repeat,
-        radial-gradient(circle at 50% 28%, #2a3142 0%, #090b10 72%);
-    }
-
-    .cover-kicker {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      letter-spacing: 0.22em;
-      color: #c5cedf;
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-
-    .cover-title {
-      font-family: var(--font-ui);
-      font-weight: 900;
-      font-size: 38px;
-      line-height: 1.05;
-      letter-spacing: 0.06em;
-      color: #ffffff;
-      text-transform: uppercase;
-      text-shadow: 0 4px 24px rgba(0,0,0,0.85);
-      margin-bottom: 10px;
-    }
-
-    .cover-subtitle {
-      font-size: 13px;
-      color: #9ba5b8;
-      margin-bottom: 22px;
-    }
-
-    .cover-btn {
-      width: 100%;
-      padding: 14px 18px;
-      border-radius: 6px;
-      font-family: var(--font-mono);
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      cursor: pointer;
-      border: none;
-      transition: 0.2s;
-      margin-bottom: 10px;
-    }
-
-    .cover-btn-primary { background: #8fb3ff; color: #0b101b; }
-    .cover-btn-primary:hover { background: #a8c5ff; }
-
-    .cover-btn-secondary {
-      background: rgba(24, 28, 38, 0.9);
-      color: #dce3f0;
-      border: 1px solid rgba(255,255,255,0.12);
-    }
-    .cover-btn-secondary:hover { background: rgba(38, 44, 58, 0.95); }
-
-    /* ==========================================================================
        ВЕРХНЯЯ ПАНЕЛЬ
        ========================================================================== */
     header {
@@ -506,137 +416,761 @@
       .choice-btn { flex-direction: column; align-items: flex-start; padding: 13px 14px; font-size: 15px; gap: 8px; }
       .choice-req { align-self: flex-start; }
       .toast { left: 12px; right: 12px; bottom: 14px; max-width: none; }
-      .cover-title { font-size: 32px; }
     }
   
 
-    /* ========================================================================== 
-       ЭКРАН ЗАГРУЗКИ (КАЛИБРОВКА КОНТУРА И Т2)
+
+    /* ==========================================================================
+       ЭКРАН ЗАГРУЗКИ
        ========================================================================== */
     #boot-loader {
       position: fixed;
       inset: 0;
-      background: #050608;
       z-index: 900;
+      background: #030304;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       padding: 24px;
-      transition: opacity 0.65s ease, visibility 0.65s ease;
+      transition: opacity 0.9s ease, visibility 0.9s ease;
+      cursor: pointer;
     }
 
-    #boot-loader.fade-out {
-      opacity: 0;
-      visibility: hidden;
+    #boot-loader.fade-out { opacity: 0; visibility: hidden; pointer-events: none; }
+
+    .loader-bg {
+      position: absolute;
+      inset: -6%;
+      background: url('cover.png') center/cover no-repeat;
+      filter: blur(14px) brightness(0.32) saturate(0.7);
+      animation: loaderDrift 14s ease-in-out infinite alternate;
+    }
+
+    .loader-vignette {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, rgba(3,3,4,0.25) 0%, rgba(3,3,4,0.92) 100%);
+    }
+
+    .loader-scan {
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(to bottom, rgba(255,255,255,0.035) 0 1px, transparent 1px 3px);
+      mix-blend-mode: overlay;
       pointer-events: none;
     }
 
-    .loader-lens {
-      width: 74px;
-      height: 74px;
+    .loader-scan::after {
+      content: "";
+      position: absolute;
+      left: 0; right: 0;
+      height: 22%;
+      background: linear-gradient(to bottom, transparent, rgba(143,179,255,0.07), transparent);
+      animation: scanSweep 4.2s linear infinite;
+    }
+
+    .loader-rec {
+      position: absolute;
+      top: 22px; left: 24px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      color: #c9ced9;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .loader-rec i {
+      width: 9px; height: 9px;
       border-radius: 50%;
-      border: 1px solid rgba(143, 179, 255, 0.25);
+      background: #e0293d;
+      box-shadow: 0 0 12px #e0293d;
+      animation: recBlink 1.2s steps(2, jump-none) infinite;
+    }
+
+    .loader-cam {
+      position: absolute;
+      top: 22px; right: 24px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      color: #6f7a90;
+    }
+
+    .loader-center {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 340px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .loader-lens {
+      width: 92px; height: 92px;
+      border-radius: 50%;
       position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 24px;
-      box-shadow: 0 0 35px rgba(78, 168, 222, 0.12);
+      margin-bottom: 26px;
+      border: 1px solid rgba(143,179,255,0.22);
+      box-shadow: 0 0 50px rgba(224,41,61,0.12), inset 0 0 24px rgba(0,0,0,0.8);
+      background: radial-gradient(circle, #0a0d14 40%, #05070b 100%);
+    }
+
+    .loader-lens::before,
+    .loader-lens::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      border: 2px solid transparent;
     }
 
     .loader-lens::before {
-      content: "";
-      position: absolute;
-      inset: -6px;
-      border-radius: 50%;
-      border: 2px solid transparent;
+      inset: -8px;
       border-top-color: #8fb3ff;
-      border-right-color: rgba(201, 59, 75, 0.7);
-      animation: spinLens 1.4s linear infinite;
+      border-right-color: rgba(224,41,61,0.75);
+      animation: spinLens 1.6s linear infinite;
+    }
+
+    .loader-lens::after {
+      inset: 8px;
+      border-bottom-color: rgba(143,179,255,0.45);
+      border-left-color: rgba(143,179,255,0.15);
+      animation: spinLens 2.8s linear infinite reverse;
     }
 
     .loader-pupil {
-      width: 14px;
-      height: 14px;
+      width: 20px; height: 20px;
       border-radius: 50%;
-      background: #c93b4b;
-      box-shadow: 0 0 14px #c93b4b;
-      animation: pulsePupil 1.6s ease-in-out infinite;
-    }
-
-    @keyframes spinLens {
-      to { transform: rotate(360deg); }
-    }
-
-    @keyframes pulsePupil {
-      0%, 100% { transform: scale(0.85); opacity: 0.75; }
-      50% { transform: scale(1.2); opacity: 1; }
+      background: radial-gradient(circle at 35% 35%, #ff6b7b, #c0192d 60%, #5c0a14);
+      box-shadow: 0 0 22px #e0293d, 0 0 4px #fff inset;
+      animation: pupilLook 5s ease-in-out infinite, pulsePupil 1.6s ease-in-out infinite;
     }
 
     .loader-title {
-      font-family: var(--font-mono);
-      font-size: 13px;
-      letter-spacing: 0.24em;
-      color: #e6ecf7;
+      font-family: var(--font-ui);
+      font-weight: 800;
+      font-size: 22px;
+      letter-spacing: 0.36em;
+      padding-left: 0.36em;
+      color: #f1ece2;
       text-transform: uppercase;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
+      text-shadow: 0 0 24px rgba(224,41,61,0.35);
     }
 
-    .loader-status {
+    .loader-sub {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.26em;
+      color: #6f7a90;
+      text-transform: uppercase;
+      margin-bottom: 26px;
+    }
+
+    .loader-log {
+      width: 100%;
+      min-height: 66px;
       font-family: var(--font-mono);
       font-size: 11px;
+      line-height: 1.7;
       color: #7f8ca3;
-      min-height: 18px;
-      margin-bottom: 18px;
-      text-align: center;
+      text-align: left;
+      margin-bottom: 14px;
     }
+
+    .loader-log div { animation: logIn 0.4s ease both; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .loader-log div b { color: #5fd08a; font-weight: 500; }
+    .loader-log div.now { color: #cfd8ea; }
 
     .loader-track {
       width: 100%;
-      max-width: 280px;
       height: 3px;
-      background: #141821;
+      background: rgba(255,255,255,0.08);
       border-radius: 2px;
       overflow: hidden;
-      margin-bottom: 8px;
+      margin-bottom: 9px;
     }
 
     .loader-progress {
       width: 0%;
       height: 100%;
-      background: linear-gradient(90deg, #4ea8de, #8fb3ff);
-      transition: width 0.25s ease;
+      background: linear-gradient(90deg, #c0192d, #e0293d 55%, #ff8a97);
+      box-shadow: 0 0 14px rgba(224,41,61,0.9);
     }
 
-    .loader-percent {
+    .loader-meta {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
       font-family: var(--font-mono);
       font-size: 11px;
-      color: #8fb3ff;
+      color: #8fa0bd;
     }
 
+    .loader-quote {
+      position: absolute;
+      bottom: 30px;
+      left: 0; right: 0;
+      text-align: center;
+      padding: 0 28px;
+      font-family: var(--font-book);
+      font-style: italic;
+      font-size: 13px;
+      color: #6d6558;
+    }
+
+    @keyframes spinLens { to { transform: rotate(360deg); } }
+    @keyframes pulsePupil { 0%,100% { filter: brightness(0.85); } 50% { filter: brightness(1.25); } }
+    @keyframes pupilLook {
+      0%,100% { transform: translate(0,0); }
+      20% { transform: translate(-7px,2px); }
+      45% { transform: translate(6px,-3px); }
+      70% { transform: translate(3px,5px); }
+    }
+    @keyframes recBlink { 0%,100% { opacity: 1; } 50% { opacity: 0.15; } }
+    @keyframes scanSweep { from { top: -25%; } to { top: 110%; } }
+    @keyframes loaderDrift { from { transform: scale(1) translate(0,0); } to { transform: scale(1.08) translate(-1.5%, -1%); } }
+    @keyframes logIn { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: none; } }
+
+    /* ==========================================================================
+       ЗАСТАВКА-ОБЛОЖКА
+       ========================================================================== */
+    #cover-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      background: #030304;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      transition: opacity 0.9s ease, visibility 0.9s ease;
+    }
+
+    #cover-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+    .cover-backdrop {
+      position: absolute;
+      inset: -5%;
+      background: url('cover.png') center/cover no-repeat;
+      filter: blur(26px) brightness(0.3) saturate(0.8);
+    }
+
+    .cover-poster {
+      position: relative;
+      height: min(94vh, 880px);
+      aspect-ratio: 2 / 3;
+      max-width: 96vw;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #07080b;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.07), 0 40px 110px rgba(0,0,0,0.95), 0 0 120px rgba(224,41,61,0.10);
+    }
+
+    .cover-art {
+      position: absolute;
+      inset: -5%;
+      background:
+        url('cover.png') center/cover no-repeat,
+        radial-gradient(circle at 50% 30%, #2a3142 0%, #090b10 72%);
+      animation: kenburns 30s ease-in-out infinite alternate;
+    }
+
+    /* Красный индикатор камеры и красный свет в коридоре */
+    .cover-cam {
+      position: absolute;
+      left: 50.6%; top: 7.6%;
+      width: 6px; height: 6px;
+      margin: -3px;
+      border-radius: 50%;
+      background: #ff4b5c;
+      box-shadow: 0 0 10px 3px rgba(255,60,80,0.9), 0 0 36px 10px rgba(255,40,60,0.45);
+      animation: recBlink 1.6s steps(2, jump-none) infinite;
+    }
+
+    .cover-light {
+      position: absolute;
+      left: 62%; top: 44%;
+      width: 260px; height: 260px;
+      margin: -130px;
+      background: radial-gradient(circle, rgba(255,40,60,0.38), transparent 65%);
+      mix-blend-mode: screen;
+      animation: redPulse 3.6s ease-in-out infinite;
+    }
+
+    .cover-fog {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 70% 30% at 20% 72%, rgba(150,165,190,0.10), transparent 70%),
+        radial-gradient(ellipse 60% 26% at 85% 60%, rgba(150,165,190,0.08), transparent 70%);
+      animation: fogDrift 18s ease-in-out infinite alternate;
+    }
+
+    .cover-grain {
+      position: absolute;
+      inset: -50%;
+      pointer-events: none;
+      opacity: 0.16;
+      mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>");
+      animation: grainShift 0.6s steps(4) infinite;
+    }
+
+    .cover-shade {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(to bottom, rgba(3,3,5,0.55) 0%, rgba(3,3,5,0) 22%),
+        linear-gradient(to top, rgba(3,3,5,0.98) 0%, rgba(3,3,5,0.88) 30%, rgba(3,3,5,0.25) 58%, rgba(3,3,5,0) 72%),
+        radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.6) 100%);
+    }
+
+    .cover-frame {
+      position: absolute;
+      inset: 12px;
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 4px;
+      pointer-events: none;
+    }
+
+    .cover-frame::before, .cover-frame::after {
+      content: "";
+      position: absolute;
+      width: 18px; height: 18px;
+      border: 2px solid rgba(224,41,61,0.8);
+    }
+    .cover-frame::before { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
+    .cover-frame::after { bottom: -1px; right: -1px; border-left: 0; border-top: 0; }
+
+    .cover-content {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      padding: 0 8% 7%;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .cover-kicker {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      letter-spacing: 0.3em;
+      color: #aeb8cc;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .cover-rule {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 150px;
+      margin-bottom: 16px;
+      color: #e0293d;
+      font-size: 8px;
+    }
+    .cover-rule span { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(224,41,61,0.8)); }
+    .cover-rule span:last-child { background: linear-gradient(270deg, transparent, rgba(224,41,61,0.8)); }
+
+    .cover-title {
+      font-family: var(--font-ui);
+      font-weight: 800;
+      font-size: clamp(40px, 8.2vh, 66px);
+      line-height: 1.02;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      color: #f3eee4;
+      text-shadow: 0 4px 30px rgba(0,0,0,0.9);
+    }
+
+    .cover-title span {
+      position: relative;
+      display: block;
+      padding-left: 0.16em;
+    }
+
+    .cover-title span.accent {
+      color: #e0293d;
+      text-shadow: 0 0 28px rgba(224,41,61,0.55), 0 4px 30px rgba(0,0,0,0.9);
+    }
+
+    .cover-title span::before,
+    .cover-title span::after {
+      content: attr(data-text);
+      position: absolute;
+      inset: 0;
+      padding-left: 0.16em;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .cover-title span::before { color: #4ea8de; animation: glitchA 7s steps(1) infinite; }
+    .cover-title span::after { color: #ff3b52; animation: glitchB 7s steps(1) infinite 0.4s; }
+    .cover-title span.accent::after { color: #8fb3ff; }
+
+    .cover-subtitle {
+      font-family: var(--font-book);
+      font-size: 14px;
+      color: #b9b2a5;
+      line-height: 1.55;
+      margin-bottom: 24px;
+    }
+    .cover-subtitle em { color: #8d8678; font-size: 12.5px; letter-spacing: 0.06em; }
+
+    .cover-btn {
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      max-width: 290px;
+      padding: 15px 18px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.25s ease, background 0.25s ease, border-color 0.25s ease;
+      margin-bottom: 10px;
+    }
+
+    .cover-btn-primary {
+      background: linear-gradient(180deg, #d4283b, #9b1624);
+      color: #fff;
+      border: 1px solid #ff6678;
+      box-shadow: 0 0 26px rgba(224,41,61,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
+    }
+
+    .cover-btn-primary::after {
+      content: "";
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 40%;
+      left: -60%;
+      background: linear-gradient(100deg, transparent, rgba(255,255,255,0.35), transparent);
+      transform: skewX(-18deg);
+      animation: btnShine 4.5s ease-in-out infinite 1.5s;
+    }
+
+    .cover-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 40px rgba(224,41,61,0.6), inset 0 1px 0 rgba(255,255,255,0.3); }
+
+    .cover-btn-secondary {
+      background: rgba(12,14,20,0.55);
+      color: #cfd6e4;
+      border: 1px solid rgba(255,255,255,0.2);
+      backdrop-filter: blur(4px);
+    }
+    .cover-btn-secondary:hover { background: rgba(30,34,46,0.8); border-color: rgba(255,255,255,0.4); transform: translateY(-2px); }
+
+    .cover-foot {
+      margin-top: 8px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      color: #5d6678;
+      text-transform: uppercase;
+    }
+
+    /* Появление элементов обложки после загрузки */
+    #cover-screen.enter .cover-poster { animation: posterIn 1.3s cubic-bezier(.2,.7,.2,1) both; }
+    #cover-screen.enter .cover-content > * { animation: riseIn 0.9s cubic-bezier(.2,.7,.2,1) both; }
+    #cover-screen.enter .cover-content > *:nth-child(1) { animation-delay: 0.5s; }
+    #cover-screen.enter .cover-content > *:nth-child(2) { animation-delay: 0.65s; }
+    #cover-screen.enter .cover-content > *:nth-child(3) { animation-delay: 0.8s; }
+    #cover-screen.enter .cover-content > *:nth-child(4) { animation-delay: 1.0s; }
+    #cover-screen.enter .cover-content > *:nth-child(5) { animation-delay: 1.15s; }
+    #cover-screen.enter .cover-content > *:nth-child(6) { animation-delay: 1.3s; }
+    #cover-screen.enter .cover-content > *:nth-child(7) { animation-delay: 1.45s; }
+
+    @keyframes posterIn { from { opacity: 0; transform: scale(1.04); filter: brightness(0.3); } to { opacity: 1; transform: none; filter: none; } }
+    @keyframes riseIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+    @keyframes kenburns { from { transform: scale(1.0) translate(0, 0); } to { transform: scale(1.1) translate(-1.5%, -1.8%); } }
+    @keyframes redPulse { 0%,100% { opacity: 0.45; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1.15); } }
+    @keyframes fogDrift { from { transform: translateX(-3%); } to { transform: translateX(3%); } }
+    @keyframes grainShift {
+      0% { transform: translate(0,0); } 25% { transform: translate(-3%,2%); }
+      50% { transform: translate(2%,-3%); } 75% { transform: translate(-2%,-1%); } 100% { transform: translate(3%,3%); }
+    }
+    @keyframes btnShine { 0%, 55% { left: -60%; } 80%, 100% { left: 130%; } }
+    @keyframes glitchA {
+      0%, 90%, 100% { opacity: 0; transform: none; }
+      91% { opacity: 0.85; transform: translate(-4px, 1px); clip-path: inset(8% 0 58% 0); }
+      93% { opacity: 0.85; transform: translate(3px, -1px); clip-path: inset(52% 0 12% 0); }
+      95% { opacity: 0; }
+    }
+    @keyframes glitchB {
+      0%, 92%, 100% { opacity: 0; transform: none; }
+      93% { opacity: 0.8; transform: translate(4px, -1px); clip-path: inset(40% 0 30% 0); }
+      96% { opacity: 0.8; transform: translate(-3px, 1px); clip-path: inset(5% 0 70% 0); }
+      97% { opacity: 0; }
+    }
+
+    /* ==========================================================================
+       ДИЗАЙН ИГРЫ: ТЁМНАЯ ОБОЛОЧКА + СТРАНИЦА СТАРОЙ КНИГИ
+       ========================================================================== */
+    ::selection { background: rgba(139,38,45,0.35); color: #fff; }
+
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: #0b0a09; }
+    ::-webkit-scrollbar-thumb { background: #3a2f26; border-radius: 6px; border: 2px solid #0b0a09; }
+    ::-webkit-scrollbar-thumb:hover { background: #5a4636; }
+
+    body { background: #08080a; }
+
+    /* Размытая обложка как фон всей игры */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: url('cover.png') center/cover no-repeat;
+      filter: blur(30px) brightness(0.26) saturate(0.8);
+      transform: scale(1.15);
+    }
+
+    header {
+      background: rgba(12,10,9,0.86);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 10px 34px rgba(0,0,0,0.55);
+      border-bottom: 1px solid #261f19;
+    }
+
+    header::after {
+      content: "";
+      position: absolute;
+      left: 0; right: 0; bottom: -1px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #b8484a 50%, transparent);
+      pointer-events: none;
+    }
+
+    .brand-title::before {
+      content: "";
+      display: inline-block;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #e0293d;
+      box-shadow: 0 0 10px #e0293d;
+      margin-right: 10px;
+      vertical-align: middle;
+      animation: recBlink 1.6s steps(2, jump-none) infinite;
+    }
+
+    .res-pill { background: rgba(29,25,21,0.85); }
+
+    .res-fill { position: relative; overflow: hidden; box-shadow: 0 0 8px rgba(255,255,255,0.18); }
+    .res-fill::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+      animation: barShine 3s linear infinite;
+    }
+    @keyframes barShine { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+
+    .tab-btn { transition: 0.2s; }
+    .tab-btn.active { box-shadow: 0 0 16px rgba(158,71,59,0.4); }
+
+    /* Страница книги */
+    main {
+      margin-top: 28px;
+      box-shadow:
+        inset 24px 0 36px rgba(65,48,28,0.20),
+        inset -6px 0 18px rgba(65,48,28,0.10),
+        1px 1px 0 #d8cbb0,
+        2px 2px 0 #cdbf9f,
+        3px 3px 0 #c2b290,
+        0 30px 80px rgba(0,0,0,0.92);
+    }
+
+    main::before {
+      content: "";
+      position: absolute;
+      inset: 12px;
+      border: 1px solid rgba(139,38,45,0.22);
+      border-radius: 2px;
+      pointer-events: none;
+    }
+
+    main::after {
+      content: "";
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 16px;
+      background: linear-gradient(90deg, rgba(40,28,16,0.30), transparent);
+      border-radius: 4px 0 0 4px;
+      pointer-events: none;
+    }
+
+    #chapter-label {
+      color: var(--ink-accent);
+      font-style: normal;
+      font-variant: small-caps;
+      letter-spacing: 0.16em;
+      font-weight: 700;
+    }
+
+    .hero-box h1::after {
+      content: "";
+      display: block;
+      width: 64px; height: 2px;
+      margin-top: 10px;
+      background: var(--ink-accent);
+    }
+
+    .t2-banner {
+      background: linear-gradient(90deg, rgba(30,77,107,0.13), rgba(30,77,107,0.03));
+      transform: rotate(-0.3deg);
+      box-shadow: 0 1px 0 rgba(30,77,107,0.12);
+    }
+
+    .story-text p:first-of-type::first-letter { font-size: 3.8em; text-shadow: 1px 1px 0 rgba(139,38,45,0.25); }
+
+    /* Текст сцены проявляется абзац за абзацем */
+    .story-text p { animation: inkIn 0.9s ease both; }
+    .story-text p:nth-child(1) { animation-delay: 0.05s; }
+    .story-text p:nth-child(2) { animation-delay: 0.45s; }
+    .story-text p:nth-child(3) { animation-delay: 0.85s; }
+    .story-text p:nth-child(4) { animation-delay: 1.25s; }
+    .story-text p:nth-child(n+5) { animation-delay: 1.6s; }
+    @keyframes inkIn { from { opacity: 0; transform: translateY(6px); filter: blur(2px); } to { opacity: 1; transform: none; filter: none; } }
+
+    .book-ornament { font-size: 20px; opacity: 0.8; }
+
+    /* Выборы: пронумерованные кнопки */
+    .choices-list { counter-reset: ch; }
+
+    .choice-btn {
+      position: relative;
+      padding-left: 56px;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.6) inset, 0 2px 6px rgba(70,50,25,0.12);
+    }
+
+    .choice-btn::before {
+      counter-increment: ch;
+      content: counter(ch);
+      position: absolute;
+      left: 14px; top: 50%;
+      transform: translateY(-50%);
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      border: 1px solid var(--ink-accent);
+      color: var(--ink-accent);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,250,240,0.8);
+      transition: 0.18s;
+    }
+
+    .choice-btn:hover:not(:disabled)::before { background: var(--ink-accent); color: #fff; }
+
+    .inspects-block, .card, .arch-card { box-shadow: 0 2px 8px rgba(70,50,25,0.10); }
+    .card, .arch-card { transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s; }
+    .card:hover, .arch-card:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(70,50,25,0.18); }
+
+    .arch-card { position: relative; }
+    .arch-card.selected::after {
+      content: "✓";
+      position: absolute;
+      top: 10px; right: 12px;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: var(--ink-accent);
+      color: #fff;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .primary-btn {
+      background: linear-gradient(180deg, #a02f37, #741b22);
+      letter-spacing: 0.1em;
+      box-shadow: 0 4px 14px rgba(139,38,45,0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+      transition: 0.2s;
+    }
+    .primary-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(139,38,45,0.5), inset 0 1px 0 rgba(255,255,255,0.25); filter: none; }
+
+    /* ==========================================================================
+       АДАПТАЦИЯ ЗАСТАВКИ И ДИЗАЙНА
+       ========================================================================== */
+    @media (max-width: 720px) {
+      .cover-poster { width: 100vw; height: 100vh; height: 100dvh; max-width: none; aspect-ratio: auto; border-radius: 0; }
+      .cover-art { background-position: center top; }
+      .cover-content { padding: 0 24px calc(28px + env(safe-area-inset-bottom)); }
+      .cover-title { font-size: clamp(40px, 12.5vw, 60px); }
+      .cover-btn { max-width: none; }
+      .loader-title { font-size: 19px; }
+      .loader-rec, .loader-cam { top: 16px; }
+      .loader-rec { left: 16px; }
+      .loader-cam { right: 16px; }
+      .loader-quote { font-size: 12px; bottom: 22px; }
+      main { margin-top: 0; box-shadow: none; }
+      main::before { inset: 8px; }
+      main::after { width: 10px; }
+      .choice-btn { padding-left: 52px; }
+      .choice-btn::before { top: 16px; transform: none; }
+      .t2-banner { transform: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; animation-delay: 0s !important; transition-duration: 0.01ms !important; }
+    }
   </style>
 </head>
 <body>
   <div id="boot-loader" aria-live="polite" aria-label="Загрузка игры">
-    <div class="loader-lens" aria-hidden="true">
-      <div class="loader-pupil"></div>
+    <div class="loader-bg" aria-hidden="true"></div>
+    <div class="loader-vignette" aria-hidden="true"></div>
+    <div class="loader-scan" aria-hidden="true"></div>
+    <div class="loader-rec" aria-hidden="true"><i></i>REC <span id="loader-timecode">03:14:00</span></div>
+    <div class="loader-cam" aria-hidden="true">CAM 07 // КОРИДОР Б</div>
+    <div class="loader-center">
+      <div class="loader-lens" aria-hidden="true"><div class="loader-pupil"></div></div>
+      <div class="loader-title">СЛЕПОЕ ПЯТНО</div>
+      <div class="loader-sub">Контур наблюдения</div>
+      <div class="loader-log" id="loader-log"></div>
+      <div class="loader-track" aria-hidden="true"><div class="loader-progress" id="loader-progress-bar"></div></div>
+      <div class="loader-meta"><span id="loader-status-text">Инициализация...</span><span id="loader-percent-text">0%</span></div>
     </div>
-    <div class="loader-title">СЛЕПОЕ ПЯТНО</div>
-    <div class="loader-status" id="loader-status-text">Инициализация контура наблюдения...</div>
-    <div class="loader-track" aria-hidden="true">
-      <div class="loader-progress" id="loader-progress-bar"></div>
-    </div>
-    <div class="loader-percent" id="loader-percent-text">0%</div>
+    <div class="loader-quote">«Ты видишь только то, что тебе позволено видеть.»</div>
   </div>
 
   <div id="cover-screen">
+    <div class="cover-backdrop" aria-hidden="true"></div>
     <div class="cover-poster">
-      <div class="cover-kicker">Интерактивный психологический триллер</div>
-      <h1 class="cover-title">СЛЕПОЕ ПЯТНО</h1>
-      <div class="cover-subtitle">Авторская книга-игра • Пролог, 8 глав и 4 варианта эпилога</div>
-      <button class="cover-btn cover-btn-primary" id="cover-new-btn" type="button">НАЧАТЬ ИГРУ</button>
-      <button class="cover-btn cover-btn-secondary" id="cover-continue-btn" type="button" style="display:none;">ПРОДОЛЖИТЬ</button>
+      <div class="cover-art" aria-hidden="true"><i class="cover-light"></i><i class="cover-cam"></i></div>
+      <div class="cover-fog" aria-hidden="true"></div>
+      <div class="cover-grain" aria-hidden="true"></div>
+      <div class="cover-shade" aria-hidden="true"></div>
+      <div class="cover-frame" aria-hidden="true"></div>
+      <div class="cover-content">
+        <div class="cover-kicker">Интерактивный психологический триллер</div>
+        <div class="cover-rule" aria-hidden="true"><span></span><b>◆</b><span></span></div>
+        <h1 class="cover-title"><span data-text="СЛЕПОЕ">СЛЕПОЕ</span><span class="accent" data-text="ПЯТНО">ПЯТНО</span></h1>
+        <div class="cover-subtitle">Авторская книга-игра<br><em>Пролог · 8 глав · 4 эпилога</em></div>
+        <button class="cover-btn cover-btn-primary" id="cover-new-btn" type="button">Начать игру</button>
+        <button class="cover-btn cover-btn-secondary" id="cover-continue-btn" type="button" style="display:none;">Продолжить</button>
+        <div class="cover-foot">Первое прохождение необратимо</div>
+      </div>
     </div>
   </div>
 
@@ -1479,32 +2013,103 @@ rewindList.appendChild(card);
 
 (function runBootLoader() {
   const loader = document.getElementById('boot-loader');
+  const cover = document.getElementById('cover-screen');
   const bar = document.getElementById('loader-progress-bar');
   const pctText = document.getElementById('loader-percent-text');
   const statusText = document.getElementById('loader-status-text');
-  if (!loader || !bar || !pctText || !statusText) return;
+  const logBox = document.getElementById('loader-log');
+  const tcText = document.getElementById('loader-timecode');
+  if (!loader || !bar || !pctText || !statusText || !logBox) {
+    if (cover) cover.classList.add('enter');
+    return;
+  }
 
   const steps = [
-    { pct: 24, text: 'Калибровка оптического датчика...' },
-    { pct: 52, text: 'Сверка архива памяти: Аэ́рхис...' },
-    { pct: 81, text: 'Установка закрытого канала Т2...' },
-    { pct: 100, text: 'Доступ к первой линии открыт.' }
+    { at: 0.04, text: 'Калибровка оптического датчика', short: 'Оптика' },
+    { at: 0.26, text: 'Сверка архива памяти: Аэ́рхис', short: 'Память' },
+    { at: 0.48, text: 'Чтение журнала интеркома', short: 'Интерком' },
+    { at: 0.70, text: 'Установка закрытого канала Т2', short: 'Канал Т2' },
+    { at: 0.90, text: 'Доступ к первой линии открыт', short: 'Готово' }
   ];
 
-  let idx = 0;
-  const timer = setInterval(() => {
-    if (idx < steps.length) {
-      bar.style.width = steps[idx].pct + '%';
-      pctText.textContent = steps[idx].pct + '%';
-      statusText.textContent = steps[idx].text;
-      idx++;
-    } else {
-      clearInterval(timer);
-      setTimeout(() => {
-        loader.classList.add('fade-out');
-      }, 320);
+  const MIN_MS = 3800;      // минимальное время показа загрузчика
+  const MAX_WAIT_MS = 9000; // страховка, если картинка не грузится
+  let start = performance.now();
+  let assetsReady = false;
+  let progress = 0;
+  let shownSteps = 0;
+  let finished = false;
+
+  // Реальная предзагрузка обложки
+  const img = new Image();
+  img.onload = img.onerror = () => { assetsReady = true; };
+  img.src = 'cover.png';
+  setTimeout(() => { assetsReady = true; }, MAX_WAIT_MS);
+
+  // Таймкод камеры
+  let sec = 14 * 60 + 0;
+  const tc = setInterval(() => {
+    sec++;
+    const h = '03';
+    const m = String(Math.floor(sec / 60) % 60).padStart(2, '0');
+    const s = String(sec % 60).padStart(2, '0');
+    if (tcText) tcText.textContent = `${h}:${m}:${s}`;
+  }, 1000);
+
+  function addLog(step, done) {
+    const prev = logBox.querySelector('.now');
+    if (prev) {
+      prev.classList.remove('now');
+      prev.innerHTML = prev.innerHTML.replace(/\s*…$/, '') + ' <b>OK</b>';
     }
-  }, 420);
+    const row = document.createElement('div');
+    row.className = 'now';
+    row.textContent = '› ' + step.text + (done ? '' : ' …');
+    logBox.appendChild(row);
+    while (logBox.children.length > 4) logBox.removeChild(logBox.firstChild);
+    statusText.textContent = step.short;
+  }
+
+  function finish() {
+    if (finished) return;
+    finished = true;
+    clearInterval(tc);
+    bar.style.width = '100%';
+    pctText.textContent = '100%';
+    const last = logBox.querySelector('.now');
+    if (last) { last.classList.remove('now'); last.innerHTML = last.innerHTML.replace(/\s*…$/, '') + ' <b>OK</b>'; }
+    setTimeout(() => {
+      if (cover) cover.classList.add('enter');
+      loader.classList.add('fade-out');
+      setTimeout(() => { loader.style.display = 'none'; }, 1000);
+    }, 450);
+  }
+
+  function frame(now) {
+    if (finished) return;
+    const elapsed = now - start;
+    let target = Math.min(1, elapsed / MIN_MS);
+    if (!assetsReady) target = Math.min(target, 0.92);
+    progress += (target - progress) * 0.09;
+    if (target >= 1 && progress > 0.992) progress = 1;
+
+    bar.style.width = (progress * 100).toFixed(1) + '%';
+    pctText.textContent = Math.round(progress * 100) + '%';
+
+    while (shownSteps < steps.length && progress >= steps[shownSteps].at) {
+      addLog(steps[shownSteps], shownSteps === steps.length - 1);
+      shownSteps++;
+    }
+
+    if (progress >= 1) { finish(); return; }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  // Пропуск по клику / клавише (после готовности ресурсов)
+  const skip = () => { start -= MIN_MS; };
+  loader.addEventListener('click', skip);
+  document.addEventListener('keydown', skip, { once: true });
 })();
 </script>
   <script src="chapters/prologue.js"></script>
