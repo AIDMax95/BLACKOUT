@@ -844,7 +844,17 @@ let loadedChapterFiles = {};
 window.registerChapter = function(chapterId, nodesObj, callsArr = []) {
 Object.assign(window.STORY_NODES, nodesObj);
 if (Array.isArray(callsArr)) {
-window.CHAPTER_CALLS.push(...callsArr);
+const registeredIds = new Set(window.CHAPTER_CALLS.map(call => call && call.id).filter(Boolean));
+callsArr.forEach(call => {
+  if (!call || !call.id || !registeredIds.has(call.id)) {
+    window.CHAPTER_CALLS.push(call);
+    if (call && call.id) registeredIds.add(call.id);
+  }
+});
+}
+// Статически подключённый модуль считается загруженным и не вставляется второй раз.
+if (typeof loadedChapterFiles !== 'undefined' && chapterId) {
+loadedChapterFiles[chapterId] = true;
 }
 };
 function loadChapterScript(chapterKey) {
@@ -1333,5 +1343,6 @@ rewindList.appendChild(card);
   };
 })();
   </script>
+  <script src="chapters/prologue.js"></script>
 </body>
 </html>
