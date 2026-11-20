@@ -1313,6 +1313,142 @@
       .smooth-reveal, .screen.active { animation:none !important; }
       .action-dock { transition:none !important; }
     }
+    /* Встроенные находки в основной книжный текст */
+    .narrative-inspect {
+      background: rgba(220, 163, 84, 0.07);
+      border-left: 3px solid var(--amber, #dca354);
+      padding: 11px 14px;
+      border-radius: 0 6px 6px 0;
+      margin: 14px 0;
+      font-family: var(--font-book, Georgia, serif);
+      font-size: 16.5px;
+      line-height: 1.68;
+      color: #e8dec8;
+      text-indent: 0;
+      animation: paragraphReveal 0.3s ease both;
+      overflow-wrap: break-word;
+    }
+    .narrative-inspect-tag {
+      display: block;
+      font-family: var(--font-mono, ui-monospace, monospace);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--amber, #dca354);
+      margin-bottom: 4px;
+    }
+
+    /* Осмотр можно выполнить только один раз */
+    .inspect-btn:disabled,
+    .inspect-btn.done {
+      opacity: 0.5;
+      cursor: default;
+      border-color: #365944;
+      background: rgba(54, 89, 68, 0.12);
+      color: #9bb3a4;
+      pointer-events: none;
+    }
+
+    /* Список вариантов с независимой прокруткой */
+    .choices-scroll {
+      max-height: 228px;
+      min-height: 0;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-right: 6px;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+      scrollbar-color: #3b4f70 rgba(10, 13, 19, 0.6);
+    }
+    .choices-scroll::-webkit-scrollbar { width: 6px; }
+    .choices-scroll::-webkit-scrollbar-track {
+      background: rgba(10, 13, 19, 0.6);
+      border-radius: 3px;
+    }
+    .choices-scroll::-webkit-scrollbar-thumb {
+      background: #3b4f70;
+      border-radius: 3px;
+    }
+
+    /* Номер варианта находится в потоке и больше не перекрывает текст */
+    .choice-btn.choice-item {
+      position: relative;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      width: 100%;
+      padding: 12px 14px;
+      background: #141a24;
+      border: 1px solid #283447;
+      border-radius: 8px;
+      color: #e2e7f0;
+      text-align: left;
+      font: 14.5px/1.45 var(--font-ui, sans-serif);
+      cursor: pointer;
+      transition: background 0.18s, border-color 0.18s;
+      box-shadow: none;
+    }
+    .choice-btn.choice-item::before { content: none !important; display: none !important; }
+    .choice-btn.choice-item:hover:not(:disabled) {
+      background: #1b2331;
+      border-color: #d64550;
+      transform: none;
+    }
+    .choice-btn.choice-item:disabled {
+      opacity: 0.58;
+      cursor: not-allowed;
+      background: #10141c;
+    }
+    .choice-left {
+      display: flex;
+      align-items: flex-start;
+      gap: 11px;
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    .choice-num {
+      flex: 0 0 24px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #1e2736;
+      border: 1px solid #3b4f70;
+      color: #9fb3d1;
+      font: 700 11px var(--font-mono, ui-monospace, monospace);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+    .choice-text {
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow-wrap: anywhere;
+      word-break: normal;
+    }
+    .choice-req.req-badge {
+      flex: 0 0 auto;
+      font: 11px var(--font-mono, ui-monospace, monospace);
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: #0b0e14;
+      border: 1px solid #2b3648;
+      color: #dca354;
+      white-space: nowrap;
+      margin-top: 1px;
+      align-self: flex-start;
+    }
+    .choice-req.req-badge.missing { color: #e06c75; border-color: rgba(224, 108, 117, 0.35); }
+
+    @media (max-width: 680px) {
+      .narrative-inspect { font-size: 15px; padding: 10px 11px; }
+      .choice-btn.choice-item { flex-direction: column; gap: 8px; }
+      .choice-left { width: 100%; }
+      .choice-req.req-badge { margin-left: 35px; }
+    }
   </style>
 
 </head>
@@ -1606,6 +1742,7 @@ clues: [],
 dossier: JSON.parse(JSON.stringify(INITIAL_DOSSIER)),
 inventory: [],
 inspectedDone: {},
+inspectionCharsCounted: {}, // Не допускает повторного начисления знаков осмотров
 visitedNodes: [], // История узлов текущей линии для Хронологии
 timelinesArchive: [], // Завершённые временные линии
 unlockedCalls: [],
@@ -1679,6 +1816,8 @@ if (!raw) return false;
 state = Object.assign(state, JSON.parse(raw));
 if (!['realistic', 'fast'].includes(state.readingMode)) state.readingMode = 'realistic';
 if (!Array.isArray(state.readNodeIds)) state.readNodeIds = [];
+if (!state.inspectedDone || typeof state.inspectedDone !== 'object') state.inspectedDone = {};
+if (!state.inspectionCharsCounted || typeof state.inspectionCharsCounted !== 'object') state.inspectionCharsCounted = {};
 if (state.currentNodeId && Number(state.charsRead) > 0 && state.readNodeIds.length === 0) state.readNodeIds.push(state.currentNodeId);
 return true;
 } catch (e) {
@@ -1728,6 +1867,7 @@ state.skills = { ...arch.skills };
 state.inventory = [...arch.items];
 state.clues = [];
 state.inspectedDone = {};
+state.inspectionCharsCounted = {};
 state.visitedNodes = [];
 state.currentNodeId = 'prologue_start';
 state.readingMode = state.readingMode || 'realistic';
@@ -1812,8 +1952,67 @@ p.textContent = String(block ?? '');
 }
 return p;
 }
+function updatePageCounter() {
+const pagesEl = document.getElementById('pages-label');
+if (!pagesEl) return;
+const chars = Math.max(0, Number(state.charsRead) || 0);
+const pages = (chars / CHARS_PER_PAGE).toFixed(1);
+pagesEl.textContent = `Книжных страниц прочитано: ${pages}`;
+}
+function appendInspectToStory(label, text, inspectId, options = {}) {
+const textContainer = document.getElementById('story-content');
+if (!textContainer) return null;
+if (!state.inspectionCharsCounted || typeof state.inspectionCharsCounted !== 'object') {
+state.inspectionCharsCounted = {};
+}
+const safeText = String(text ?? '');
+const key = inspectId ? String(inspectId) : '';
+
+// Начисляем объём каждого осмотра один раз за всё прохождение.
+if (key && !state.inspectionCharsCounted[key]) {
+state.charsRead = (Number(state.charsRead) || 0) + safeText.length;
+state.inspectionCharsCounted[key] = true;
+updatePageCounter();
+}
+
+// Защита от повторного добавления одного осмотра в пределах текущей отрисовки.
+if (key) {
+const existing = Array.from(textContainer.querySelectorAll('.narrative-inspect'))
+  .find(el => el.dataset.inspectId === key);
+if (existing) return existing;
+}
+
+const block = document.createElement('div');
+block.className = 'narrative-inspect';
+if (key) block.dataset.inspectId = key;
+const tag = document.createElement('span');
+tag.className = 'narrative-inspect-tag';
+tag.textContent = `Наблюдение // ${String(label ?? '')}`;
+const body = document.createElement('span');
+body.className = 'narrative-inspect-text';
+body.textContent = safeText;
+block.appendChild(tag);
+block.appendChild(body);
+textContainer.appendChild(block);
+
+if (options.scroll !== false && typeof block.scrollIntoView === 'function') {
+block.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+return block;
+}
+function appendCompletedInspectsToStory(node) {
+if (!node || !Array.isArray(node.inspects) || !node.inspects.length) return;
+const before = Number(state.charsRead) || 0;
+node.inspects.forEach(insp => {
+if (insp && insp.id && state.inspectedDone[insp.id]) {
+appendInspectToStory(insp.label, insp.text, insp.id, { scroll: false });
+}
+});
+if ((Number(state.charsRead) || 0) !== before) saveState();
+}
 function revealActionDock(token) {
 if (token !== renderVersion) return;
+appendCompletedInspectsToStory(currentRenderedNode);
 const dock = document.getElementById('action-dock');
 const skipBar = document.getElementById('skip-typing-bar');
 if (skipBar) skipBar.style.display = 'none';
@@ -1855,6 +2054,10 @@ if (fallbackChoice) selectChoice(fallbackChoice);
 }, 1000);
 }
 async function renderNode(nodeId, isRewind = false) {
+const mainScroller = document.querySelector('main');
+const previousNodeId = state.currentNodeId;
+const previousScrollTop = mainScroller ? mainScroller.scrollTop : 0;
+const preserveScrollPosition = previousNodeId === nodeId;
 clearReadingTimers();
 clearDeadline();
 const token = ++renderVersion;
@@ -1906,29 +2109,30 @@ if (!state.readNodeIds.includes(nodeId)) {
 state.readNodeIds.push(nodeId);
 state.charsRead = (Number(state.charsRead) || 0) + nodeChars;
 }
-const pages = ((Number(state.charsRead) || 0) / CHARS_PER_PAGE).toFixed(1);
-document.getElementById('pages-label').textContent = `Книжных страниц прочитано: ${pages}`;
+updatePageCounter();
 
-// Подготовить осмотры и выборы до открытия нижней панели.
+// Подготовить одноразовые осмотры до открытия нижней панели.
 const inspContainer = document.getElementById('inspects-container');
 const inspBtns = document.getElementById('inspect-buttons');
-const inspOut = document.getElementById('inspect-output');
 inspBtns.innerHTML = '';
-inspOut.style.display = 'none';
 if (node.inspects && node.inspects.length > 0) {
 inspContainer.style.display = 'block';
 node.inspects.forEach(insp => {
 const btn = document.createElement('button');
 const done = !!state.inspectedDone[insp.id];
+btn.type = 'button';
 btn.className = 'inspect-btn' + (done ? ' done' : '');
-btn.textContent = (done ? '✓ ' : '◉ ') + insp.label;
+btn.disabled = done;
+btn.textContent = (done ? '✓ Осмотрено: ' : '◉ ') + insp.label;
 btn.onclick = () => {
-inspOut.style.display = 'block';
-inspOut.textContent = insp.text;
-if (!state.inspectedDone[insp.id]) {
+if (state.inspectedDone[insp.id]) return;
 state.inspectedDone[insp.id] = true;
+btn.disabled = true;
 btn.classList.add('done');
-btn.textContent = '✓ ' + insp.label;
+btn.textContent = '✓ Осмотрено: ' + insp.label;
+
+appendInspectToStory(insp.label, insp.text, insp.id);
+
 if (insp.clue && !state.clues.some(c => c.id === insp.clue.id)) {
 state.clues.push(insp.clue);
 checkCallsTriggers(insp.clue.id);
@@ -1938,7 +2142,6 @@ if (insp.giveItem && !state.inventory.includes(insp.giveItem)) state.inventory.p
 if (insp.skillGain) Object.entries(insp.skillGain).forEach(([sk, v]) => { state.skills[sk] = (state.skills[sk] || 0) + v; });
 renderResources();
 saveState();
-}
 };
 inspBtns.appendChild(btn);
 });
@@ -1955,9 +2158,10 @@ state.timelinesArchive.push({ id: archiveId, lineNum: state.timelineIndex, endin
 }
 const choicesBox = document.getElementById('choices-container');
 choicesBox.innerHTML = '';
-(node.choices || []).forEach(ch => {
+(node.choices || []).forEach((ch, idx) => {
 const btn = document.createElement('button');
-btn.className = 'choice-btn';
+btn.type = 'button';
+btn.className = 'choice-btn choice-item';
 let allowed = true;
 let reqLabel = '';
 if (ch.reqSkill) {
@@ -1973,7 +2177,25 @@ allowed = state.clues.some(c => c.id === ch.reqClue);
 reqLabel = 'Требуется улика';
 }
 btn.disabled = !allowed;
-btn.innerHTML = `<span>${ch.text}</span>${reqLabel ? `<span class="choice-req">${reqLabel}</span>` : ''}`;
+
+const left = document.createElement('span');
+left.className = 'choice-left';
+const number = document.createElement('span');
+number.className = 'choice-num';
+number.textContent = String(idx + 1);
+const text = document.createElement('span');
+text.className = 'choice-text';
+text.textContent = String(ch.text ?? '');
+left.appendChild(number);
+left.appendChild(text);
+btn.appendChild(left);
+
+if (reqLabel) {
+const req = document.createElement('span');
+req.className = 'choice-req req-badge' + (allowed ? '' : ' missing');
+req.textContent = reqLabel;
+btn.appendChild(req);
+}
 btn.onclick = () => selectChoice(ch);
 choicesBox.appendChild(btn);
 });
@@ -2009,6 +2231,11 @@ dockRevealTimer = setTimeout(() => revealActionDock(token), 620);
 };
 revealNext();
 }
+requestAnimationFrame(() => {
+if (token !== renderVersion) return;
+const scroller = document.querySelector('main');
+if (scroller) scroller.scrollTop = preserveScrollPosition ? previousScrollTop : 0;
+});
 }
 function selectChoice(ch) {
 clearDeadline();
