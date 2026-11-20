@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>СЛЕПОЕ ПЯТНО — Интерактивный психологический триллер</title>
+  <style>
+    :root {
+      --bg-outer: #0b0c0e;
+      --paper: #efe4ce;
+      --paper-edge: #dfd0b2;
+      --ink: #221c16;
+      --ink-dim: #5e5041;
+      --ink-accent: #8b262d;
+      --t2-ink: #1e4d6b;
+      --border-paper: #c8b696;
+      --font-book: 'Palatino Linotype', 'Book Antiqua', 'Georgia', serif;
+      --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg-outer);
+      color: var(--ink);
+      font-family: var(--font-ui);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* ==========================================================================
+       СТАРТОВАЯ ОБЛОЖКА
+       ========================================================================== */
+    #cover-screen {
+      position: fixed;
+      inset: 0;
+      background: #050608;
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    #cover-screen.hidden { display: none; }
+
+    .cover-poster {
+      width: 100%;
+      max-width: 440px;
+      height: 92vh;
+      max-height: 780px;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 32px 24px;
+      text-align: center;
+      box-shadow: 0 25px 70px rgba(0,0,0,0.9);
+      border: 1px solid rgba(255,255,255,0.08);
+      /* Положите cover.jpg рядом с index.html; без него останется тёмный градиент */
+      background:
+        linear-gradient(to bottom, rgba(5,6,8,0.15) 0%, rgba(5,6,8,0.55) 55%, rgba(5,6,8,0.97) 85%),
+        url('cover.jpg') center/cover no-repeat,
+        radial-gradient(circle at 50% 28%, #2a3142 0%, #090b10 72%);
+    }
+
+    .cover-kicker {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      color: #c5cedf;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .cover-title {
+      font-family: var(--font-ui);
+      font-weight: 900;
+      font-size: 38px;
+      line-height: 1.05;
+      letter-spacing: 0.06em;
+      color: #ffffff;
+      text-transform: uppercase;
+      text-shadow: 0 4px 24px rgba(0,0,0,0.85);
+      margin-bottom: 10px;
+    }
+
+    .cover-subtitle {
+      font-size: 13px;
+      color: #9ba5b8;
+      margin-bottom: 22px;
+    }
+
+    .cover-btn {
+      width: 100%;
+      padding: 14px 18px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border: none;
+      transition: 0.2s;
+      margin-bottom: 10px;
+    }
+
+    .cover-btn-primary { background: #8fb3ff; color: #0b101b; }
+    .cover-btn-primary:hover { background: #a8c5ff; }
+
+    .cover-btn-secondary {
+      background: rgba(24, 28, 38, 0.9);
+      color: #dce3f0;
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+    .cover-btn-secondary:hover { background: rgba(38, 44, 58, 0.95); }
+
+    /* ==========================================================================
+       ВЕРХНЯЯ ПАНЕЛЬ
+       ========================================================================== */
+    header {
+      background: #141210;
+      border-bottom: 1px solid #2e2720;
+      padding: 10px 18px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      color: #e6dcc8;
+    }
+
+    .brand { display: flex; align-items: center; gap: 12px; }
+
+    .brand-title {
+      font-family: var(--font-book);
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      font-size: 16px;
+      color: #f3e8d2;
+    }
+
+    .brand-sub {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: #a89984;
+      padding: 2px 7px;
+      border: 1px solid #3a3127;
+      border-radius: 4px;
+    }
+
+    .resources { display: flex; flex-wrap: wrap; gap: 8px; }
+
+    .res-pill {
+      background: #1d1915;
+      border: 1px solid #352c23;
+      border-radius: 5px;
+      padding: 4px 9px;
+      min-width: 105px;
+    }
+
+    .res-top {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: #d6c8b2;
+      margin-bottom: 3px;
+    }
+
+    .res-bar { height: 4px; background: #0d0b09; border-radius: 2px; overflow: hidden; }
+    .res-fill { height: 100%; transition: width 0.35s ease; }
+
+    .nav-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    .tab-btn {
+      background: #1d1915;
+      color: #a89984;
+      border: 1px solid #352c23;
+      padding: 6px 11px;
+      border-radius: 5px;
+      font-size: 12px;
+      font-family: var(--font-mono);
+      cursor: pointer;
+    }
+
+    .tab-btn:hover { color: #f7ebd4; }
+    .tab-btn.active { background: #3b261d; color: #f7ebd4; border-color: #9e473b; }
+    .tab-btn.locked { opacity: 0.45; cursor: not-allowed; }
+    .badge { background: #9e473b; color: #fff; font-size: 10px; padding: 1px 5px; border-radius: 10px; margin-left: 4px; }
+
+    /* ==========================================================================
+       СТРАНИЦА СТАРОЙ КНИГИ
+       ========================================================================== */
+    main {
+      max-width: 820px;
+      width: 100%;
+      margin: 24px auto 60px;
+      padding: 42px 48px 54px;
+      /* зернистость бумаги + пергаментный градиент */
+      background:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.25  0 0 0 0 0.18  0 0 0 0 0.1  0 0 0 0.09 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"),
+        radial-gradient(ellipse at center, var(--paper) 60%, var(--paper-edge) 100%);
+      color: var(--ink);
+      border-radius: 4px 10px 10px 4px;
+      box-shadow:
+        inset 18px 0 32px rgba(65, 48, 28, 0.16),
+        inset -6px 0 18px rgba(65, 48, 28, 0.10),
+        0 20px 55px rgba(0, 0, 0, 0.85);
+      border: 1px solid var(--border-paper);
+      position: relative;
+      flex: 1;
+    }
+
+    .screen { display: none; }
+    .screen.active { display: block; animation: pageTurn 0.3s ease; }
+
+    @keyframes pageTurn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero-box h1 {
+      font-family: var(--font-book);
+      font-size: 26px;
+      letter-spacing: 0.1em;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+
+    .hero-box h2 { font-family: var(--font-book); font-size: 17px; margin-bottom: 4px; }
+
+    .hero-desc {
+      font-family: var(--font-book);
+      font-size: 15px;
+      color: var(--ink-dim);
+      margin-bottom: 18px;
+    }
+
+    code { font-family: var(--font-mono); font-size: 0.9em; }
+
+    /* Колонтитул */
+    .meta-strip {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-book);
+      font-style: italic;
+      font-size: 13px;
+      color: var(--ink-dim);
+      margin-bottom: 22px;
+      padding-bottom: 8px;
+      border-bottom: 1px double var(--border-paper);
+    }
+
+    /* Пометка Т2 на полях */
+    .t2-banner {
+      background: rgba(30, 77, 107, 0.08);
+      border-left: 3px solid var(--t2-ink);
+      padding: 10px 14px;
+      margin-bottom: 22px;
+      font-family: var(--font-book);
+      font-style: italic;
+      font-size: 14.5px;
+      color: var(--t2-ink);
+    }
+
+    .t2-tag { font-weight: 700; font-style: normal; margin-right: 6px; }
+
+    /* Текст с буквицей и красной строкой */
+    .story-text {
+      font-family: var(--font-book);
+      font-size: 18.5px;
+      line-height: 1.75;
+      color: var(--ink);
+      text-align: justify;
+      margin-bottom: 28px;
+    }
+
+    .story-text p { margin-bottom: 14px; text-indent: 1.6em; }
+
+    .story-text p:first-of-type { text-indent: 0; }
+    .story-text p:first-of-type::first-letter {
+      float: left;
+      font-size: 3.4em;
+      line-height: 0.82;
+      padding-right: 10px;
+      padding-top: 4px;
+      font-weight: 700;
+      color: var(--ink-accent);
+    }
+
+    .dlg-hero {
+      text-indent: 0 !important;
+      padding-left: 14px;
+      border-left: 2px solid var(--ink-accent);
+      font-weight: 600;
+      color: #1a120d;
+    }
+
+    .dlg-npc {
+      text-indent: 0 !important;
+      padding-left: 14px;
+      border-left: 2px solid #8a7963;
+      color: #2f261d;
+    }
+
+    /* Виньетка-разделитель */
+    .book-ornament {
+      text-align: center;
+      font-size: 18px;
+      color: var(--ink-dim);
+      margin: 18px 0 22px;
+      letter-spacing: 0.4em;
+    }
+
+    .inspects-block, .card, .hero-box, .arch-card {
+      background: rgba(255, 250, 240, 0.55);
+      border: 1px solid var(--border-paper);
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 18px;
+    }
+
+    .section-label {
+      font-family: var(--font-book);
+      font-variant: small-caps;
+      letter-spacing: 0.12em;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--ink-dim);
+      margin-bottom: 10px;
+    }
+
+    .inspect-list { display: flex; flex-wrap: wrap; gap: 8px; }
+
+    .inspect-btn {
+      background: #e6d7bc;
+      border: 1px solid #b5a180;
+      color: var(--ink);
+      padding: 8px 13px;
+      border-radius: 4px;
+      font-family: var(--font-book);
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .inspect-btn:hover { background: #dcc8a4; }
+    .inspect-btn.done { opacity: 0.65; }
+
+    .inspect-result {
+      margin-top: 12px;
+      padding: 12px;
+      background: rgba(255,255,255,0.45);
+      border-left: 2px solid var(--ink-accent);
+      font-family: var(--font-book);
+      font-size: 15.5px;
+    }
+
+    .deadline-box {
+      background: rgba(139, 38, 45, 0.12);
+      border: 1px solid var(--ink-accent);
+      padding: 10px 14px;
+      border-radius: 5px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--ink-accent);
+    }
+
+    .deadline-timer { font-size: 18px; font-weight: 700; color: var(--ink-accent); }
+
+    .choices-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .choice-btn {
+      background: rgba(255, 251, 242, 0.72);
+      border: 1px solid #b8a482;
+      color: var(--ink);
+      text-align: left;
+      padding: 13px 16px;
+      border-radius: 5px;
+      font-family: var(--font-book);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      transition: 0.18s;
+    }
+
+    .choice-btn:hover:not(:disabled) {
+      background: #fffdf7;
+      border-color: var(--ink-accent);
+      transform: translateX(3px);
+    }
+
+    .choice-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .choice-req {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 3px 7px;
+      border-radius: 4px;
+      background: #e5d5b7;
+      color: #4f3e2b;
+      white-space: nowrap;
+    }
+
+    .choice-req.fail { color: var(--ink-accent); }
+
+    .archetype-grid, .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 12px;
+    }
+
+    .arch-card { cursor: pointer; margin-bottom: 0; }
+    .arch-card:hover { background: #fffdf8; }
+    .arch-card.selected { border: 2px solid var(--ink-accent); background: #fffdf8; }
+    .arch-name, .card h3 { font-family: var(--font-book); font-weight: 700; font-size: 16px; margin-bottom: 4px; color: var(--ink); }
+    .arch-bio, .card p { font-size: 13.5px; color: var(--ink-dim); }
+    .arch-bio { margin-bottom: 8px; }
+    .arch-bonus { font-family: var(--font-mono); font-size: 11px; color: var(--ink-accent); margin-top: 6px; }
+
+    .status-tag {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      margin-top: 8px;
+      background: #e5d5b7;
+      color: #4f3e2b;
+    }
+
+    .primary-btn {
+      background: var(--ink-accent);
+      color: #fff;
+      border: none;
+      padding: 13px 24px;
+      border-radius: 5px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 18px;
+    }
+
+    .primary-btn:hover { filter: brightness(1.12); }
+
+    .toast {
+      position: fixed;
+      bottom: 18px;
+      right: 18px;
+      background: #1b1713;
+      color: #f3e8d2;
+      border: 1px solid #9e473b;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+      padding: 12px 16px;
+      border-radius: 6px;
+      max-width: 340px;
+      z-index: 600;
+      display: none;
+      font-size: 13px;
+    }
+
+    .toast.show { display: block; animation: pageTurn 0.25s ease; }
+
+    /* ==========================================================================
+       МОБИЛЬНАЯ АДАПТАЦИЯ
+       ========================================================================== */
+    @media (max-width: 720px) {
+      header { padding: 8px 12px; gap: 6px; }
+      .brand { width: 100%; justify-content: space-between; }
+      .brand-title { font-size: 14px; }
+      .resources { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+      .res-pill { min-width: 0; padding: 4px 7px; }
+      .res-top { font-size: 10px; }
+      .nav-tabs { width: 100%; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+      .nav-tabs::-webkit-scrollbar { display: none; }
+      .tab-btn { flex: 0 0 auto; font-size: 11px; padding: 7px 11px; }
+      main { margin: 0; padding: 22px 18px 90px; border-radius: 0; border-left: none; border-right: none; }
+      .hero-box h1 { font-size: 22px; }
+      .story-text { font-size: 17px; line-height: 1.68; text-align: left; }
+      .archetype-grid, .grid-2 { grid-template-columns: 1fr; gap: 10px; }
+      .primary-btn { width: 100%; padding: 14px; }
+      .meta-strip { flex-direction: column; align-items: flex-start; gap: 4px; font-size: 12px; }
+      .t2-banner { padding: 10px 12px; font-size: 13.5px; }
+      .inspect-list { flex-direction: column; }
+      .inspect-btn { width: 100%; text-align: left; padding: 11px 12px; }
+      .deadline-box { flex-direction: column; align-items: flex-start; gap: 6px; font-size: 11px; }
+      .choice-btn { flex-direction: column; align-items: flex-start; padding: 13px 14px; font-size: 15px; gap: 8px; }
+      .choice-req { align-self: flex-start; }
+      .toast { left: 12px; right: 12px; bottom: 14px; max-width: none; }
+      .cover-title { font-size: 32px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="cover-screen">
+    <div class="cover-poster">
+      <div class="cover-kicker">Интерактивный психологический триллер</div>
+      <h1 class="cover-title">СЛЕПОЕ ПЯТНО</h1>
+      <div class="cover-subtitle">Авторская книга-игра • Пролог, 8 глав и 4 варианта эпилога</div>
+      <button class="cover-btn cover-btn-primary" id="cover-new-btn" type="button">НАЧАТЬ ИГРУ</button>
+      <button class="cover-btn cover-btn-secondary" id="cover-continue-btn" type="button" style="display:none;">ПРОДОЛЖИТЬ</button>
+    </div>
+  </div>
+
+  <header>
+    <div class="brand">
+      <div>
+        <div class="brand-title">СЛЕПОЕ ПЯТНО</div>
+        <div class="brand-sub" id="timeline-indicator">ЛИНИЯ #1 // НЕОБРАТИМО</div>
+      </div>
+    </div>
+    <div class="resources" id="resources-bar"></div>
+    <nav class="nav-tabs" aria-label="Разделы игры">
+      <button class="tab-btn active" id="tab-story" data-tab="story" type="button">Сюжет</button>
+      <button class="tab-btn" id="tab-skills" data-tab="skills" type="button">Навыки</button>
+      <button class="tab-btn" id="tab-clues" data-tab="clues" type="button">Улики <span class="badge" id="clues-count">0</span></button>
+      <button class="tab-btn" id="tab-dossier" data-tab="dossier" type="button">Досье</button>
+      <button class="tab-btn" id="tab-calls" data-tab="calls" type="button">Связь <span class="badge" id="calls-count">0</span></button>
+      <button class="tab-btn" id="tab-inventory" data-tab="inventory" type="button">Предметы</button>
+      <button class="tab-btn locked" id="tab-chronology" data-tab="chronology" type="button">Хронология Т2</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="screen-start" class="screen active">
+      <div class="hero-box">
+        <h1>СЛЕПОЕ ПЯТНО</h1>
+        <p class="hero-desc">
+          За обычными разговорами скрывается тревожная история о слежке, подмене памяти и закрытом контуре наблюдения.
+          Первое прохождение необратимо. После финала откроется Хронология Т2 — возможность вернуться в любую точку,
+          переписать выбор Аэ́рхиса и увидеть, к чему приведёт новая версия событий.
+        </p>
+        <h2>Выберите психологический профиль Аэ́рхиса:</h2>
+        <div id="archetype-list" class="archetype-grid"></div>
+        <button id="btn-start-game" class="primary-btn" type="button">НАЧАТЬ ПЕРВУЮ ЛИНИЮ</button>
+      </div>
+    </section>
+
+    <section id="screen-story" class="screen">
+      <div class="meta-strip">
+        <span id="chapter-label">ПРОЛОГ</span>
+        <span id="pages-label">Книжных страниц прочитано: 0.0</span>
+      </div>
+      <div id="t2-comment-box" class="t2-banner" style="display:none;"></div>
+      <div id="story-content" class="story-text"></div>
+      <div class="book-ornament">❧</div>
+      <div id="inspects-container" class="inspects-block" style="display:none;">
+        <div class="section-label">Точки наблюдения (осмотр сцены)</div>
+        <div class="inspect-list" id="inspect-buttons"></div>
+        <div id="inspect-output" class="inspect-result" style="display:none;"></div>
+      </div>
+      <div id="deadline-container" class="deadline-box" style="display:none;">
+        <span>КРИТИЧЕСКОЕ ОКНО ОТВЕТА — МОЛЧАНИЕ БУДЕТ ЗАФИКСИРОВАНО</span>
+        <span class="deadline-timer" id="deadline-seconds">20s</span>
+      </div>
+      <div id="choices-container" class="choices-list"></div>
+    </section>
+
+    <section id="screen-skills" class="screen">
+      <div class="hero-box"><h1>ПСИХОМЕТРИЧЕСКИЙ ПРОФИЛЬ</h1><p class="hero-desc">Десять навыков Аэ́рхиса и их текущие уровни.</p></div>
+      <div id="skills-grid" class="grid-2"></div>
+    </section>
+    <section id="screen-clues" class="screen">
+      <div class="hero-box"><h1>ЗАФИКСИРОВАННЫЕ УЛИКИ</h1><p class="hero-desc">Несостыковки и факты, найденные во время осмотров.</p></div>
+      <div id="clues-grid" class="grid-2"></div>
+    </section>
+    <section id="screen-dossier" class="screen">
+      <div class="hero-box"><h1>ДОСЬЕ</h1><p class="hero-desc">Субъекты наблюдения и окружение.</p></div>
+      <div id="dossier-grid" class="grid-2"></div>
+    </section>
+    <section id="screen-calls" class="screen">
+      <div class="hero-box"><h1>ПЕРЕХВАЧЕННЫЕ КАНАЛЫ</h1><p class="hero-desc">Входящие вызовы и сообщения.</p></div>
+      <div id="calls-grid" class="grid-2"></div>
+    </section>
+    <section id="screen-inventory" class="screen">
+      <div class="hero-box"><h1>ЛИЧНЫЕ ВЕЩИ</h1><p class="hero-desc">Предметы и носители данных.</p></div>
+      <div id="inventory-grid" class="grid-2"></div>
+    </section>
+    <section id="screen-chronology" class="screen">
+      <div class="hero-box">
+        <h1>ХРОНОЛОГИЯ Т2</h1>
+        <div id="t2-chronology-speech" class="t2-banner">[T2 // АРХИВ ЛИНИЙ]: Первая линия завершена. Теперь ты видишь швы.</div>
+      </div>
+      <h2 class="section-label">Сохранённые временные линии</h2>
+      <div id="timelines-list" class="grid-2"></div>
+      <h2 class="section-label" style="margin-top:24px;">Узлы текущей линии (доступны для перезаписи решения)</h2>
+      <div id="nodes-rewind-list" class="grid-2"></div>
+    </section>
+  </main>
+
+  <div id="toast-box" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+
+
+/**
+• ============================================================================
+• КОНФИГУРАЦИЯ ИГРЫ «СЛЕПОЕ ПЯТНО»
+• ============================================================================
+*/
+const SAVE_KEY = 'blind_spot_aerhis_v1';
+const CHARS_PER_PAGE = 1600;
+const RESOURCES_META = {
+hp:     { name: 'Рассудок',   max: 100, color: '#c93b4b' },
+o2:     { name: 'Доверие',    max: 100, color: '#4ea8de' },
+energy: { name: 'Выдержка',   max: 100, color: '#d4a359' },
+ammo:   { name: 'Компромат',  max: 20,  color: '#48a868' }
+};
+const SKILLS_META = {
+paranoia:    { name: 'Паранойя',           desc: 'Способность замечать слежку, подмену слов и скрытую угрозу.' },
+empathy:     { name: 'Эмпатия',            desc: 'Считывание истинных эмоций и страхов собеседника.' },
+cold_calc:   { name: 'Холодный расчёт',    desc: 'Логический анализ без паники даже под давлением.' },
+mimicry:     { name: 'Мимикрия',           desc: 'Умение подстраиваться под ожидания наблюдателей и играть роль.' },
+details:     { name: 'Внимание к деталям', desc: 'Фиксация мелких несостыковок в вещах, времени и записях.' },
+composure:   { name: 'Самообладание',      desc: 'Контроль пульса, голоса и мимики на допросах.' },
+provocation: { name: 'Провокация',         desc: 'Умение вывести оппонента из равновесия резкой репликой.' },
+intuition:   { name: 'Интуиция',           desc: 'Предчувствие ловушек и скрытых развилок.' },
+subtext:     { name: 'Чтение между строк', desc: 'Расшифровка недомолвок, пауз и двойных смыслов.' },
+resilience:  { name: 'Стойкость',          desc: 'Сопротивление психологическому давлению и вмешательствам Т2.' }
+};
+const ARCHETYPES = [
+{
+id: 'analyst',
+name: 'Аналитик',
+bio: 'Ищет систему в каждом сбое. Не верит совпадениям и фиксирует любую аномалию.',
+bonusText: '+2 Внимание к деталям, +2 Холодный расчёт, +2 Компромат',
+stats: { hp: 95, o2: 75, energy: 100, ammo: 4 },
+skills: { paranoia: 2, empathy: 1, cold_calc: 3, mimicry: 1, details: 3, composure: 2, provocation: 1, intuition: 1, subtext: 2, resilience: 2 },
+items: ['dictaphone', 'cipher_note']
+},
+{
+id: 'mimic',
+name: 'Двойник',
+bio: 'Умеет быть именно тем Аэ́рхисом, которого хотят видеть камеры и люди вокруг.',
+bonusText: '+2 Мимикрия, +2 Самообладание, +15 Доверие',
+stats: { hp: 90, o2: 95, energy: 90, ammo: 2 },
+skills: { paranoia: 1, empathy: 2, cold_calc: 1, mimicry: 3, details: 1, composure: 3, provocation: 1, intuition: 2, subtext: 2, resilience: 2 },
+items: ['spare_badge', 'sedative']
+},
+{
+id: 'empath',
+name: 'Эмпат',
+bio: 'Слышит дрожь в чужом голосе раньше, чем собеседник произнесёт ложь.',
+bonusText: '+2 Эмпатия, +2 Чтение между строк, +10 Доверие',
+stats: { hp: 85, o2: 90, energy: 95, ammo: 2 },
+skills: { paranoia: 1, empathy: 3, cold_calc: 1, mimicry: 2, details: 2, composure: 1, provocation: 1, intuition: 2, subtext: 3, resilience: 2 },
+items: ['old_photo', 'sedative']
+},
+{
+id: 'provocateur',
+name: 'Провокатор',
+bio: 'Намеренно ломает чужой сценарий, вынуждая наблюдателей ошибаться.',
+bonusText: '+3 Провокация, +2 Паранойя, +3 Компромат',
+stats: { hp: 90, o2: 65, energy: 100, ammo: 5 },
+skills: { paranoia: 3, empathy: 1, cold_calc: 2, mimicry: 1, details: 2, composure: 1, provocation: 4, intuition: 1, subtext: 1, resilience: 2 },
+items: ['dictaphone', 'burner_sim']
+},
+{
+id: 'shadow',
+name: 'Тень',
+bio: 'Держится в слепой зоне камер и разговоров, собирая факты без лишнего шума.',
+bonusText: '+2 Паранойя, +2 Интуиция, +15 Выдержка',
+stats: { hp: 95, o2: 80, energy: 100, ammo: 3 },
+skills: { paranoia: 3, empathy: 1, cold_calc: 2, mimicry: 2, details: 2, composure: 2, provocation: 0, intuition: 3, subtext: 1, resilience: 2 },
+items: ['master_key', 'cipher_note']
+},
+{
+id: 'strategist',
+name: 'Стратег',
+bio: 'Просчитывает последствия на три разговора вперёд и бережёт козыри.',
+bonusText: '+2 Холодный расчёт, +2 Чтение между строк, +3 Компромат',
+stats: { hp: 95, o2: 80, energy: 95, ammo: 5 },
+skills: { paranoia: 2, empathy: 1, cold_calc: 3, mimicry: 2, details: 2, composure: 2, provocation: 1, intuition: 1, subtext: 3, resilience: 1 },
+items: ['cipher_note', 'burner_sim']
+},
+{
+id: 'rebel',
+name: 'Непокорный',
+bio: 'Отказывается принимать правила эксперимента даже ценой собственного рассудка.',
+bonusText: '+3 Стойкость, +2 Самообладание, +10 Рассудок',
+stats: { hp: 100, o2: 70, energy: 95, ammo: 3 },
+skills: { paranoia: 2, empathy: 1, cold_calc: 1, mimicry: 0, details: 2, composure: 3, provocation: 2, intuition: 2, subtext: 1, resilience: 4 },
+items: ['sedative', 'master_key']
+}
+];
+const ITEMS_DB = {
+dictaphone:  { name: 'Микродиктофон', desc: 'Записывает противоречия в диалогах. Использование: +2 Компромата.', use: (s) => { changeStat('ammo', 2); return 'Запись сохранена в защищённый буфер (+2 Компромата).'; } },
+sedative:    { name: 'Блокатор тревоги', desc: 'Снижает панику после контакта с Т2. Использование: +15 Рассудка.', use: (s) => { changeStat('hp', 15); return 'Пульс выровнялся, шум в ушах отступил (+15 Рассудка).'; } },
+cipher_note: { name: 'Блокнот с пометками', desc: 'Личные записи Аэ́рхиса о провалах в памяти. Использование: +15 Выдержки.', use: (s) => { changeStat('energy', 15); return 'Сверив даты, вы вернули ясность мысли (+15 Выдержки).'; } },
+spare_badge: { name: 'Дубликат пропуска', desc: 'Открывает закрытые сектора и проверки Мимикрии.' },
+old_photo:   { name: 'Выцветший снимок', desc: 'Фотография без даты. Помогает в разговорах с Мирой и Верой.' },
+burner_sim:  { name: 'Резервный модуль связи', desc: 'Позволяет принять скрытый вызов без фиксации в основном журнале.' },
+master_key:  { name: 'Отмычка сервисных люков', desc: 'Даёт доступ к техническим помещениям контура.' }
+};
+const INITIAL_DOSSIER = {
+mira:  { name: 'Мира Соколова', role: 'Соседка / Координатор сектора', trust: 50, status: 'Активна', note: 'Слишком точно знает расписание Аэ́рхиса. Улыбается на полсекунды позже, чем нужно.' },
+ilya:  { name: 'Илья Кравцов', role: 'Коллега по архиву', trust: 45, status: 'Активен', note: 'Постоянно оглядывается на индикаторы над дверью. Боится говорить вслух.' },
+vera:  { name: 'Вера Орлова', role: 'Психолог-куратор', trust: 40, status: 'Активна', note: 'Ведёт протокол стабильности. Утверждает, что половина воспоминаний Аэ́рхиса — реконструкция.' },
+voss:  { name: 'Артур Восс', role: 'Руководитель внешнего контура', trust: 20, status: 'Неизвестно', note: 'Имя встречается в удалённых отчётах. Лично в кадре не появляется.' }
+};
+const CHAPTER_FILES = {
+prologue: 'chapters/prologue.js',
+ch01: 'chapters/ch01.js',
+ch02: 'chapters/ch02.js',
+ch03: 'chapters/ch03.js',
+ch04: 'chapters/ch04.js',
+ch05: 'chapters/ch05.js',
+ch06: 'chapters/ch06.js',
+ch07: 'chapters/ch07.js',
+ch08: 'chapters/ch08.js',
+end_01: 'chapters/end_01.js',
+end_02: 'chapters/end_02.js',
+end_03: 'chapters/end_03.js',
+end_04: 'chapters/end_04.js'
+};
+/**
+• ============================================================================
+• РЕЕСТР СЮЖЕТНЫХ УЗЛОВ И ВСТРОЕННАЯ СТАРТОВАЯ СЦЕНА (ДЛЯ ПРОВЕРКИ ДВИЖКА)
+• ============================================================================
+*/
+window.STORY_NODES = {
+prologue_start: {
+chapter: 'ПРОЛОГ // ТОЧКА ВХОДА',
+t2Comment: 'Линия #1 инициализирована. Наблюдаю за первичным откликом Аэ́рхиса. Не спеши верить тому, что видишь в зеркале.',
+text: [
+'Будильник не звенел, но ты открыл глаза ровно в 03:14. На потолке, прямо над кроватью, едва заметно мигал крошечный красный диод датчика дыма — слишком ритмично для обычной электроники.',
+{ type: 'npc', text: '«Аэ́рхис, ты уже не спишь? Нам нужно сверить утренний протокол до прихода Веры» — голос Миры донёсся из интеркома в прихожей.' },
+{ type: 'hero', text: '«Я ещё не подходил к двери. Откуда ты знаешь, что я проснулся?»' },
+'В динамике повисла пауза ровно на три секунды. Слишком долгая для случайной заминки и слишком короткая для искреннего удивления.'
+],
+inspects: [
+{
+id: 'insp_mirror',
+label: 'Осмотреть тумбочку и часы',
+text: 'Секундная стрелка наручных часов замерла на 03:14, хотя электронное табло на стене уже показывает 03:17. На обратной стороне корпуса царапина в виде буквы «Т» и цифры «2».',
+clue: { id: 'clue_stopped_watch', title: 'Остановленные часы (03:14)', desc: 'Механические часы встали в момент пробуждения. На крышке выцарапано «Т2».' },
+skillGain: { details: 1 }
+},
+{
+id: 'insp_intercom',
+label: 'Проверить панель интеркома',
+text: 'Индикатор микрофона горит зелёным, хотя кнопку вызова никто не нажимал. Канал прослушивания был открыт всю ночь.',
+clue: { id: 'clue_live_mic', title: 'Активный канал интеркома', desc: 'Микрофон в квартире Аэ́рхиса транслировал звук наружу без входящего звонка.' },
+statDelta: { ammo: 1 }
+}
+],
+deadline: 25,
+timeoutChoiceIndex: 2,
+choices: [
+{
+text: 'Ответить спокойно, скрыв, что заметил прослушку',
+reqSkill: { skill: 'mimicry', min: 2 },
+statDelta: { o2: 5, energy: -5 },
+t2Shift: 1,
+next: 'prologue_corridor_demo'
+},
+{
+text: 'Потребовать объяснить, почему микрофон был включён ночью',
+reqSkill: { skill: 'provocation', min: 2 },
+statDelta: { o2: -10, ammo: 2 },
+t2Shift: -1,
+next: 'prologue_corridor_demo'
+},
+{
+text: '[Молчание / Истечение времени] Подойти к двери без единого слова',
+statDelta: { hp: -5, o2: -5 },
+t2Shift: 0,
+next: 'prologue_corridor_demo'
+}
+]
+},
+prologue_corridor_demo: {
+chapter: 'ПРОЛОГ // ДЕМОНСТРАЦИЯ ФИНАЛА ЛИНИИ',
+t2Comment: 'Ты сделал первый необратимый шаг. В полноценной главе здесь развернётся ветка на десятки узлов, но сейчас я открою тебе доступ к Хронологии.',
+isEnding: true,
+endingTitle: 'Нулевая точка: Контур обнаружен',
+text: [
+'За дверью никого не оказалось — только запечатанный конверт без имени отправителя и тихий гул вентиляции, в котором угадывалось чужое дыхание.',
+'Твой первый след записан в архив. Теперь ты можешь открыть вкладку «Хронология Т2» в верхнем меню, увидеть сохранённую линию и попробовать изменить своё первое решение.'
+],
+choices: [
+{
+text: 'Открыть Хронологию Т2 и изучить ветвление',
+action: 'openChronology'
+}
+]
+}
+};
+window.CHAPTER_CALLS = [
+{
+id: 'call_ilya_01',
+from: 'Илья Кравцов',
+triggerClue: 'clue_live_mic',
+delaySec: 4,
+text: '«Не говори в прихожей. Если ты нашёл активный канал — проверь выписку за прошлый вторник. Тебя там нет».'
+}
+];
+/**
+• ============================================================================
+• ЯДРО СОСТОЯНИЯ ДВИЖКА
+• ============================================================================
+*/
+let state = {
+started: false,
+archetypeId: 'analyst',
+timelineIndex: 1,
+chronologyUnlocked: false,
+t2Affinity: 0,
+charsRead: 0,
+currentNodeId: 'prologue_start',
+stats: { hp: 100, o2: 80, energy: 100, ammo: 3 },
+skills: {},
+clues: [],
+dossier: JSON.parse(JSON.stringify(INITIAL_DOSSIER)),
+inventory: [],
+inspectedDone: {},
+visitedNodes: [], // История узлов текущей линии для Хронологии
+timelinesArchive: [], // Завершённые временные линии
+unlockedCalls: [],
+flags: {}
+};
+let deadlineInterval = null;
+let loadedChapterFiles = {};
+// API для подключения внешних модулей глав (chapters/ch01.js и т.д.)
+window.registerChapter = function(chapterId, nodesObj, callsArr = []) {
+Object.assign(window.STORY_NODES, nodesObj);
+if (Array.isArray(callsArr)) {
+window.CHAPTER_CALLS.push(...callsArr);
+}
+};
+function loadChapterScript(chapterKey) {
+return new Promise((resolve) => {
+const src = CHAPTER_FILES[chapterKey];
+if (!src || loadedChapterFiles[chapterKey]) return resolve();
+const script = document.createElement('script');
+script.src = src;
+script.onload = () => { loadedChapterFiles[chapterKey] = true; resolve(); };
+script.onerror = () => { console.warn('Модуль главы ещё не создан:', src); resolve(); };
+document.head.appendChild(script);
+});
+}
+/**
+• ============================================================================
+• ИНИЦИАЛИЗАЦИЯ И СОХРАНЕНИЕ
+• ============================================================================
+*/
+function saveState() {
+try {
+localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+} catch (e) {
+console.warn('Автосохранение недоступно в этом режиме браузера:', e);
+}
+}
+function loadState() {
+try {
+const raw = localStorage.getItem(SAVE_KEY);
+if (!raw) return false;
+state = Object.assign(state, JSON.parse(raw));
+return true;
+} catch (e) {
+console.warn('Сохранение не удалось прочитать:', e);
+return false;
+}
+}
+function initArchetypesUI() {
+const box = document.getElementById('archetype-list');
+box.innerHTML = '';
+ARCHETYPES.forEach(arch => {
+const div = document.createElement('div');
+div.className = 'arch-card' + (state.archetypeId === arch.id ? ' selected' : '');
+div.innerHTML = `<div class="arch-name">${arch.name}</div><div class="arch-bio">${arch.bio}</div><div class="arch-bonus">${arch.bonusText}</div>`;
+div.onclick = () => {
+state.archetypeId = arch.id;
+initArchetypesUI();
+};
+box.appendChild(div);
+});
+}
+document.getElementById('btn-start-game').onclick = () => {
+const arch = ARCHETYPES.find(a => a.id === state.archetypeId) || ARCHETYPES[0];
+state.started = true;
+state.stats = { ...arch.stats };
+state.skills = { ...arch.skills };
+state.inventory = [...arch.items];
+state.clues = [];
+state.inspectedDone = {};
+state.visitedNodes = [];
+state.currentNodeId = 'prologue_start';
+saveState();
+switchTab('story');
+renderNode('prologue_start');
+};
+/**
+• ============================================================================
+• РЕНДЕР РЕСУРСОВ И СЮЖЕТНОГО УЗЛА
+• ============================================================================
+*/
+function renderResources() {
+const bar = document.getElementById('resources-bar');
+bar.innerHTML = '';
+Object.entries(RESOURCES_META).forEach(([key, meta]) => {
+const val = Math.max(0, Math.min(meta.max, state.stats[key] ?? 0));
+const pct = Math.round((val / meta.max) * 100);
+const pill = document.createElement('div');
+pill.className = 'res-pill';
+pill.innerHTML = `<div class="res-top"><span>${meta.name}</span><span>${val}/${meta.max}</span></div><div class="res-bar"><div class="res-fill" style="width:${pct}%; background:${meta.color};"></div></div>`;
+bar.appendChild(pill);
+});
+document.getElementById('clues-count').textContent = state.clues.length;
+document.getElementById('calls-count').textContent = state.unlockedCalls.length;
+const chronoTab = document.getElementById('tab-chronology');
+const tlBadge = document.getElementById('timeline-indicator');
+if (state.chronologyUnlocked) {
+chronoTab.classList.remove('locked');
+tlBadge.textContent = `ЛИНИЯ #${state.timelineIndex} // ХРОНОЛОГИЯ ОТКРЫТА`;
+} else {
+chronoTab.classList.add('locked');
+tlBadge.textContent = `ЛИНИЯ #${state.timelineIndex} // НЕОБРАТИМО`;
+}
+}
+function changeStat(key, delta) {
+if (!RESOURCES_META[key]) return;
+const max = RESOURCES_META[key].max;
+state.stats[key] = Math.max(0, Math.min(max, (state.stats[key] || 0) + delta));
+}
+function clearDeadline() {
+if (deadlineInterval) {
+clearInterval(deadlineInterval);
+deadlineInterval = null;
+}
+document.getElementById('deadline-container').style.display = 'none';
+}
+async function renderNode(nodeId, isRewind = false) {
+clearDeadline();
+// Автоподгрузка модуля по самому длинному совпадающему ключу.
+// Важно: модуль загружается и тогда, когда в HTML есть демонстрационный
+// узел с таким же ID — внешний файл должен иметь возможность его заменить.
+const chapterKey = Object.keys(CHAPTER_FILES)
+  .sort((a, b) => b.length - a.length)
+  .find(key => nodeId === key || nodeId.startsWith(key + '_'));
+if (chapterKey && !loadedChapterFiles[chapterKey]) {
+  await loadChapterScript(chapterKey);
+}
+const node = window.STORY_NODES[nodeId];
+if (!node) {
+document.getElementById('story-content').innerHTML = `<p>Узел <code>${nodeId}</code> ожидает подключения файла главы в папке <code>chapters/</code>.</p>`;
+return;
+}
+state.currentNodeId = nodeId;
+// Запись узла в историю текущей линии (снимок состояния для Хронологии Т2)
+if (!isRewind) {
+const snapshot = {
+nodeId,
+chapter: node.chapter || '',
+stats: { ...state.stats },
+skills: { ...state.skills },
+clues: [...state.clues],
+inventory: [...state.inventory]
+};
+const existingIdx = state.visitedNodes.findIndex(v => v.nodeId === nodeId);
+if (existingIdx === -1) state.visitedNodes.push(snapshot);
+}
+document.getElementById('chapter-label').textContent = node.chapter || 'ГЛАВА';
+// Комментарий Т2
+const t2Box = document.getElementById('t2-comment-box');
+if (node.t2Comment) {
+t2Box.style.display = 'block';
+t2Box.innerHTML = `<span class="t2-tag">[T2]:</span> ${node.t2Comment}`;
+} else {
+t2Box.style.display = 'none';
+}
+// Текст сцены и подсчёт книжных страниц (1600 знаков)
+const contentBox = document.getElementById('story-content');
+contentBox.innerHTML = '';
+let nodeChars = 0;
+node.text.forEach(block => {
+const p = document.createElement('p');
+if (typeof block === 'string') {
+p.textContent = block;
+nodeChars += block.length;
+} else if (block.type === 'hero') {
+p.className = 'dlg-hero';
+p.textContent = block.text;
+nodeChars += block.text.length;
+} else if (block.type === 'npc') {
+p.className = 'dlg-npc';
+p.textContent = block.text;
+nodeChars += block.text.length;
+}
+contentBox.appendChild(p);
+});
+state.charsRead += nodeChars;
+const pages = (state.charsRead / CHARS_PER_PAGE).toFixed(1);
+document.getElementById('pages-label').textContent = `Книжных страниц прочитано: ${pages}`;
+// Осмотры (inspects)
+const inspContainer = document.getElementById('inspects-container');
+const inspBtns = document.getElementById('inspect-buttons');
+const inspOut = document.getElementById('inspect-output');
+inspBtns.innerHTML = '';
+inspOut.style.display = 'none';
+if (node.inspects && node.inspects.length > 0) {
+inspContainer.style.display = 'block';
+node.inspects.forEach(insp => {
+const btn = document.createElement('button');
+const done = !!state.inspectedDone[insp.id];
+btn.className = 'inspect-btn' + (done ? ' done' : '');
+btn.textContent = (done ? '✓ ' : '• ') + insp.label;
+btn.onclick = () => {
+inspOut.style.display = 'block';
+inspOut.textContent = insp.text;
+if (!state.inspectedDone[insp.id]) {
+state.inspectedDone[insp.id] = true;
+btn.classList.add('done');
+btn.textContent = '✓ ' + insp.label;
+if (insp.clue && !state.clues.some(c => c.id === insp.clue.id)) {
+state.clues.push(insp.clue);
+checkCallsTriggers(insp.clue.id);
+}
+if (insp.statDelta) {
+Object.entries(insp.statDelta).forEach(([k, v]) => changeStat(k, v));
+}
+// Некоторые точки осмотра открывают предметы непосредственно в инвентарь.
+if (insp.giveItem && !state.inventory.includes(insp.giveItem)) {
+  state.inventory.push(insp.giveItem);
+}
+if (insp.skillGain) {
+Object.entries(insp.skillGain).forEach(([sk, v]) => {
+state.skills[sk] = (state.skills[sk] || 0) + v;
+});
+}
+renderResources();
+saveState();
+}
+};
+inspBtns.appendChild(btn);
+});
+} else {
+inspContainer.style.display = 'none';
+}
+// Если узел финальный — фиксируем линию в Хронологии Т2
+if (node.isEnding) {
+state.chronologyUnlocked = true;
+const archiveId = `line_${state.timelineIndex}_${nodeId}`;
+if (!state.timelinesArchive.some(t => t.id === archiveId)) {
+state.timelinesArchive.push({
+id: archiveId,
+lineNum: state.timelineIndex,
+endingTitle: node.endingTitle || 'Финал линии',
+nodesCount: state.visitedNodes.length,
+t2Affinity: state.t2Affinity
+});
+}
+}
+// Варианты выбора
+const choicesBox = document.getElementById('choices-container');
+choicesBox.innerHTML = '';
+(node.choices || []).forEach((ch, idx) => {
+const btn = document.createElement('button');
+btn.className = 'choice-btn';
+let allowed = true;
+let reqLabel = '';
+if (ch.reqSkill) {
+const cur = state.skills[ch.reqSkill.skill] || 0;
+const skName = SKILLS_META[ch.reqSkill.skill]?.name || ch.reqSkill.skill;
+allowed = cur >= ch.reqSkill.min;
+reqLabel = `${skName} ${cur}/${ch.reqSkill.min}`;
+} else if (ch.reqItem) {
+allowed = state.inventory.includes(ch.reqItem);
+const itemName = ITEMS_DB[ch.reqItem]?.name || ch.reqItem;
+reqLabel = `Предмет: ${itemName}`;
+} else if (ch.reqClue) {
+allowed = state.clues.some(c => c.id === ch.reqClue);
+reqLabel = 'Требуется улика';
+}
+btn.disabled = !allowed;
+btn.innerHTML = `<span>${ch.text}</span>${reqLabel ? `<span class="choice-req">${reqLabel}</span>` : ''}`;
+btn.onclick = () => selectChoice(ch);
+choicesBox.appendChild(btn);
+});
+// Таймер дедлайна (если задан в узле)
+if (node.deadline && node.choices && node.choices.length > 0) {
+let left = node.deadline;
+const dBox = document.getElementById('deadline-container');
+const dSec = document.getElementById('deadline-seconds');
+dBox.style.display = 'flex';
+dSec.textContent = left + 's';
+deadlineInterval = setInterval(() => {
+left--;
+dSec.textContent = left + 's';
+if (left <= 0) {
+clearDeadline();
+const fallbackIdx = node.timeoutChoiceIndex ?? (node.choices.length - 1);
+const fallbackChoice = node.choices[fallbackIdx];
+if (fallbackChoice) selectChoice(fallbackChoice);
+}
+}, 1000);
+}
+renderResources();
+saveState();
+}
+function selectChoice(ch) {
+clearDeadline();
+if (ch.statDelta) {
+Object.entries(ch.statDelta).forEach(([k, v]) => changeStat(k, v));
+}
+if (typeof ch.t2Shift === 'number') {
+state.t2Affinity += ch.t2Shift;
+}
+if (ch.giveItem && !state.inventory.includes(ch.giveItem)) {
+state.inventory.push(ch.giveItem);
+}
+if (ch.action === 'openChronology') {
+switchTab('chronology');
+return;
+}
+if (ch.next) {
+renderNode(ch.next);
+}
+}
+/**
+• ============================================================================
+• СИСТЕМА ВХОДЯЩИХ ВЫЗОВОВ С ЗАДЕРЖКОЙ ДОСТАВКИ
+• ============================================================================
+*/
+function checkCallsTriggers(clueId) {
+window.CHAPTER_CALLS.forEach(call => {
+if (call.triggerClue === clueId && !state.unlockedCalls.some(c => c.id === call.id)) {
+const delay = (call.delaySec || 2) * 1000;
+setTimeout(() => {
+state.unlockedCalls.push(call);
+renderResources();
+saveState();
+showToast(`Входящий канал: ${call.from}. Проверьте вкладку «Связь».`);
+}, delay);
+}
+});
+}
+function showToast(msg) {
+const t = document.getElementById('toast-box');
+t.textContent = msg;
+t.classList.add('show');
+setTimeout(() => t.classList.remove('show'), 4500);
+}
+/**
+• ============================================================================
+• ВКЛАДКИ ИНТЕРФЕЙСА И ХРОНОЛОГИЯ Т2
+• ============================================================================
+*/
+function switchTab(tabName) {
+if (tabName === 'chronology' && !state.chronologyUnlocked) {
+showToast('Хронология Т2 заблокирована до завершения первой необратимой линии.');
+return;
+}
+document.querySelectorAll('.tab-btn').forEach(b => {
+b.classList.toggle('active', b.dataset.tab === tabName);
+});
+document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+if (tabName === 'story') {
+document.getElementById(state.started ? 'screen-story' : 'screen-start').classList.add('active');
+} else {
+document.getElementById('screen-' + tabName).classList.add('active');
+if (tabName === 'skills') renderSkillsTab();
+if (tabName === 'clues') renderCluesTab();
+if (tabName === 'dossier') renderDossierTab();
+if (tabName === 'calls') renderCallsTab();
+if (tabName === 'inventory') renderInventoryTab();
+if (tabName === 'chronology') renderChronologyTab();
+}
+}
+document.querySelectorAll('.tab-btn').forEach(btn => {
+btn.onclick = () => switchTab(btn.dataset.tab);
+});
+function renderSkillsTab() {
+const grid = document.getElementById('skills-grid');
+grid.innerHTML = '';
+Object.entries(SKILLS_META).forEach(([key, meta]) => {
+const val = state.skills[key] || 0;
+const card = document.createElement('div');
+card.className = 'card';
+card.innerHTML = `<h3>${meta.name} — Уровень ${val}</h3><p>${meta.desc}</p>`;
+grid.appendChild(card);
+});
+}
+function renderCluesTab() {
+const grid = document.getElementById('clues-grid');
+grid.innerHTML = state.clues.length ? '' : 'Улики пока не зафиксированы. Осматривайте сцены.';
+state.clues.forEach(c => {
+const card = document.createElement('div');
+card.className = 'card';
+card.innerHTML = `<h3>${c.title}</h3><p>${c.desc}</p>`;
+grid.appendChild(card);
+});
+}
+function renderDossierTab() {
+const grid = document.getElementById('dossier-grid');
+grid.innerHTML = '';
+Object.values(state.dossier).forEach(npc => {
+const card = document.createElement('div');
+card.className = 'card';
+card.innerHTML = `<h3>${npc.name}</h3><p>${npc.role}</p><p style="margin-top:8px;">${npc.note}</p><span class="status-tag">Статус: ${npc.status} // Доверие: ${npc.trust}%</span>`;
+grid.appendChild(card);
+});
+}
+function renderCallsTab() {
+const grid = document.getElementById('calls-grid');
+grid.innerHTML = state.unlockedCalls.length ? '' : 'Входящих перехватов пока нет.';
+state.unlockedCalls.forEach(call => {
+const card = document.createElement('div');
+card.className = 'card';
+card.innerHTML = `<h3>Канал: ${call.from}</h3><p>${call.text}</p>`;
+grid.appendChild(card);
+});
+}
+function renderInventoryTab() {
+const grid = document.getElementById('inventory-grid');
+grid.innerHTML = state.inventory.length ? '' : 'Инвентарь пуст.';
+state.inventory.forEach((itemId, idx) => {
+const item = ITEMS_DB[itemId];
+if (!item) return;
+const card = document.createElement('div');
+card.className = 'card';
+card.innerHTML = `<h3>${item.name}</h3><p>${item.desc}</p>`;
+if (item.use) {
+const useBtn = document.createElement('button');
+useBtn.className = 'inspect-btn';
+useBtn.style.marginTop = '10px';
+useBtn.textContent = 'Использовать';
+useBtn.onclick = () => {
+const msg = item.use(state);
+state.inventory.splice(idx, 1);
+renderResources();
+renderInventoryTab();
+saveState();
+showToast(msg);
+};
+card.appendChild(useBtn);
+}
+grid.appendChild(card);
+});
+}
+function renderChronologyTab() {
+const speech = document.getElementById('t2-chronology-speech');
+if (state.t2Affinity > 0) {
+speech.textContent = `Ты действуешь осторожно, Аэ́рхис (Отношение Т2: +${state.t2Affinity}). Выбери точку возврата — я сохраню прежнюю линию в архиве.`;
+} else if (state.t2Affinity < 0) {
+speech.textContent = `Ты провоцируешь систему и ломаешь сценарий (Отношение Т2: ${state.t2Affinity}). Посмотрим, станет ли следующая версия лучше.`;
+} else {
+speech.textContent = 'Первая линия зафиксирована. Выбери любой пройденный узел ниже, чтобы создать новую временную линию.';
+}
+const tlList = document.getElementById('timelines-list');
+tlList.innerHTML = '';
+state.timelinesArchive.forEach(tl => {
+const card = document.createElement('div');
+card.className = 'card';
+card.innerHTML = `<h3>Временная линия #${tl.lineNum}</h3><p>Финал: ${tl.endingTitle}</p><span class="status-tag">Пройдено узлов: ${tl.nodesCount}</span>`;
+tlList.appendChild(card);
+});
+const rewindList = document.getElementById('nodes-rewind-list');
+rewindList.innerHTML = '';
+state.visitedNodes.forEach((snap, idx) => {
+const card = document.createElement('div');
+card.className = 'card';
+card.innerHTML = `<h3>${idx + 1}. ${snap.chapter || snap.nodeId}</h3><p>Узел: <code>${snap.nodeId}</code></p>`;
+const btn = document.createElement('button');
+btn.className = 'inspect-btn';
+btn.style.marginTop = '10px';
+btn.textContent = 'Переписать решение с этого узла';
+btn.onclick = () => {
+state.timelineIndex += 1;
+state.stats = { ...snap.stats };
+state.skills = { ...snap.skills };
+state.clues = [...snap.clues];
+state.inventory = [...snap.inventory];
+state.visitedNodes = state.visitedNodes.slice(0, idx + 1);
+saveState();
+switchTab('story');
+renderNode(snap.nodeId, true);
+showToast(`Создана Временная линия #${state.timelineIndex}`);
+};
+card.appendChild(btn);
+rewindList.appendChild(card);
+});
+}
+// Запуск при загрузке страницы
+(function boot() {
+  loadState();
+  initArchetypesUI();
+  renderResources();
+  // Узел сюжета отрисовывается по кнопке «ПРОДОЛЖИТЬ» на обложке,
+  // чтобы таймер дедлайна не шёл за закрытой обложкой.
+})();
+
+(function initCover() {
+  const cover = document.getElementById('cover-screen');
+  const btnNew = document.getElementById('cover-new-btn');
+  const btnCont = document.getElementById('cover-continue-btn');
+
+  if (state && state.started) {
+    btnCont.style.display = 'block';
+  }
+
+  btnNew.onclick = () => {
+    cover.classList.add('hidden');
+    clearDeadline();
+    switchTab('story');
+    document.getElementById('screen-start').classList.add('active');
+    document.getElementById('screen-story').classList.remove('active');
+  };
+
+  btnCont.onclick = () => {
+    cover.classList.add('hidden');
+    switchTab('story');
+    renderNode(state.currentNodeId, true);
+  };
+})();
+  </script>
+</body>
+</html>
