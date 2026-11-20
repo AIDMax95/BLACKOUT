@@ -63,7 +63,7 @@
       text-align: center;
       box-shadow: 0 25px 70px rgba(0,0,0,0.9);
       border: 1px solid rgba(255,255,255,0.08);
-      /* Положите cover.jpg рядом с index.html; без него останется тёмный градиент */
+      /* Положите cover.png рядом с index.html; без него останется тёмный градиент */
       background:
         linear-gradient(to bottom, rgba(5,6,8,0.15) 0%, rgba(5,6,8,0.55) 55%, rgba(5,6,8,0.97) 85%),
         url('cover.png') center/cover no-repeat,
@@ -508,9 +508,128 @@
       .toast { left: 12px; right: 12px; bottom: 14px; max-width: none; }
       .cover-title { font-size: 32px; }
     }
+  
+
+    /* ========================================================================== 
+       ЭКРАН ЗАГРУЗКИ (КАЛИБРОВКА КОНТУРА И Т2)
+       ========================================================================== */
+    #boot-loader {
+      position: fixed;
+      inset: 0;
+      background: #050608;
+      z-index: 900;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      transition: opacity 0.65s ease, visibility 0.65s ease;
+    }
+
+    #boot-loader.fade-out {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .loader-lens {
+      width: 74px;
+      height: 74px;
+      border-radius: 50%;
+      border: 1px solid rgba(143, 179, 255, 0.25);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+      box-shadow: 0 0 35px rgba(78, 168, 222, 0.12);
+    }
+
+    .loader-lens::before {
+      content: "";
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      border-top-color: #8fb3ff;
+      border-right-color: rgba(201, 59, 75, 0.7);
+      animation: spinLens 1.4s linear infinite;
+    }
+
+    .loader-pupil {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #c93b4b;
+      box-shadow: 0 0 14px #c93b4b;
+      animation: pulsePupil 1.6s ease-in-out infinite;
+    }
+
+    @keyframes spinLens {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes pulsePupil {
+      0%, 100% { transform: scale(0.85); opacity: 0.75; }
+      50% { transform: scale(1.2); opacity: 1; }
+    }
+
+    .loader-title {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      letter-spacing: 0.24em;
+      color: #e6ecf7;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .loader-status {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #7f8ca3;
+      min-height: 18px;
+      margin-bottom: 18px;
+      text-align: center;
+    }
+
+    .loader-track {
+      width: 100%;
+      max-width: 280px;
+      height: 3px;
+      background: #141821;
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .loader-progress {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #4ea8de, #8fb3ff);
+      transition: width 0.25s ease;
+    }
+
+    .loader-percent {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #8fb3ff;
+    }
+
   </style>
 </head>
 <body>
+  <div id="boot-loader" aria-live="polite" aria-label="Загрузка игры">
+    <div class="loader-lens" aria-hidden="true">
+      <div class="loader-pupil"></div>
+    </div>
+    <div class="loader-title">СЛЕПОЕ ПЯТНО</div>
+    <div class="loader-status" id="loader-status-text">Инициализация контура наблюдения...</div>
+    <div class="loader-track" aria-hidden="true">
+      <div class="loader-progress" id="loader-progress-bar"></div>
+    </div>
+    <div class="loader-percent" id="loader-percent-text">0%</div>
+  </div>
+
   <div id="cover-screen">
     <div class="cover-poster">
       <div class="cover-kicker">Интерактивный психологический триллер</div>
@@ -1342,7 +1461,38 @@ rewindList.appendChild(card);
     renderNode(state.currentNodeId, true);
   };
 })();
-  </script>
+  
+
+(function runBootLoader() {
+  const loader = document.getElementById('boot-loader');
+  const bar = document.getElementById('loader-progress-bar');
+  const pctText = document.getElementById('loader-percent-text');
+  const statusText = document.getElementById('loader-status-text');
+  if (!loader || !bar || !pctText || !statusText) return;
+
+  const steps = [
+    { pct: 24, text: 'Калибровка оптического датчика...' },
+    { pct: 52, text: 'Сверка архива памяти: Аэ́рхис...' },
+    { pct: 81, text: 'Установка закрытого канала Т2...' },
+    { pct: 100, text: 'Доступ к первой линии открыт.' }
+  ];
+
+  let idx = 0;
+  const timer = setInterval(() => {
+    if (idx < steps.length) {
+      bar.style.width = steps[idx].pct + '%';
+      pctText.textContent = steps[idx].pct + '%';
+      statusText.textContent = steps[idx].text;
+      idx++;
+    } else {
+      clearInterval(timer);
+      setTimeout(() => {
+        loader.classList.add('fade-out');
+      }, 320);
+    }
+  }, 420);
+})();
+</script>
   <script src="chapters/prologue.js"></script>
 </body>
 </html>
