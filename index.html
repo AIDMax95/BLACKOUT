@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>СЛЕПОЕ ПЯТНО — Интерактивный психологический триллер</title>
   <style>
     :root {
@@ -1135,6 +1135,186 @@
       *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; animation-delay: 0s !important; transition-duration: 0.01ms !important; }
     }
   </style>
+
+  <style id="blind-spot-dark-reader-theme">
+    :root {
+      color-scheme: dark;
+      --bg-deep: #07090d;
+      --bg-surface: #0e1219;
+      --bg-card: #141a24;
+      --bg-elevated: #1b2331;
+      --line: #253042;
+      --line-glow: #3b4f70;
+      --text-main: #e2e7f0;
+      --text-muted: #8492a6;
+      --crimson: #d64550;
+      --amber: #dca354;
+      --t2: #56b6c2;
+      --ok: #50fa7b;
+      --font-book: Georgia, 'Palatino Linotype', serif;
+      --font-ui: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    html, body { width:100%; height:100%; min-height:100%; }
+    body {
+      height:100dvh; min-height:0; overflow:hidden; overflow-x:hidden;
+      background:#07090d; color:var(--text-main); font-family:var(--font-ui);
+      line-height:1.55; display:flex; flex-direction:column;
+    }
+    body::before {
+      content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
+      background:url('cover.png') center/cover no-repeat;
+      filter:blur(30px) brightness(.20) saturate(.65); transform:scale(1.12);
+    }
+    header {
+      flex:0 0 auto; display:flex; flex-direction:column; gap:8px;
+      padding:9px 14px 8px; background:rgba(14,18,25,.96);
+      border-bottom:1px solid var(--line); color:var(--text-main);
+      box-shadow:0 8px 28px rgba(0,0,0,.4); position:relative; top:auto;
+    }
+    .header-top { display:flex; justify-content:space-between; align-items:center; gap:10px; }
+    .brand { min-width:0; }
+    .brand-title { color:#fff; font:800 14px/1.2 ui-monospace,monospace; letter-spacing:.14em; }
+    .brand-sub { margin-top:4px; color:var(--t2); background:var(--bg-card); border:1px solid var(--line); font-size:9px; }
+    .mode-switch { display:flex; gap:3px; padding:3px; background:var(--bg-deep); border:1px solid var(--line); border-radius:7px; flex:0 0 auto; }
+    .mode-btn { padding:6px 9px; border:0; border-radius:5px; background:transparent; color:var(--text-muted); font:10px ui-monospace,monospace; cursor:pointer; }
+    .mode-btn.active { color:#fff; background:var(--bg-elevated); box-shadow:inset 0 0 0 1px var(--line-glow); }
+    .resources { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; width:100%; }
+    .res-pill { min-width:0; padding:5px 8px; background:var(--bg-card); border:1px solid var(--line); border-radius:6px; }
+    .res-top { color:#dce3ee; font-size:10px; }
+    .res-bar { background:#080b11; height:4px; }
+    .nav-tabs { display:flex; flex-wrap:nowrap; gap:5px; width:100%; overflow-x:auto; overscroll-behavior-x:contain; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+    .nav-tabs::-webkit-scrollbar { display:none; }
+    .tab-btn { flex:0 0 auto; padding:7px 10px; background:var(--bg-card); border:1px solid var(--line); color:var(--text-muted); border-radius:6px; font:10px ui-monospace,monospace; white-space:nowrap; }
+    .tab-btn.active { background:rgba(214,69,80,.16); border-color:var(--crimson); color:#fff; }
+    .tab-btn.locked { opacity:.45; }
+    .badge { background:var(--crimson); color:#fff; }
+    main {
+      width:100%; max-width:840px; flex:1 1 auto; min-height:0; overflow-y:auto;
+      overscroll-behavior:contain; scrollbar-width:thin; scrollbar-color:var(--line-glow) transparent;
+      margin:0 auto; padding:14px 16px calc(24px + env(safe-area-inset-bottom,0px));
+      background:transparent; color:var(--text-main); border:0; border-radius:0; box-shadow:none;
+    }
+    main::before, main::after { display:none !important; }
+    .screen { display:none; }
+    .screen.active { display:block; animation:pageTurn .25s ease; }
+    #screen-story.active { display:flex; flex-direction:column; gap:12px; }
+    .hero-box, .card, .arch-card, .inspects-block {
+      background:rgba(14,18,25,.96); border:1px solid var(--line); color:var(--text-main);
+      border-radius:9px; padding:15px; box-shadow:0 8px 24px rgba(0,0,0,.2);
+    }
+    .hero-box h1, .hero-box h2, .card h3, .arch-name { color:#fff; font-family:var(--font-ui); }
+    .hero-desc, .arch-bio, .card p { color:var(--text-muted); }
+    .archetype-grid, .grid-2 { grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr)); }
+    .arch-card { cursor:pointer; margin:0; }
+    .arch-card:hover { background:var(--bg-elevated); }
+    .arch-card.selected { border:1px solid var(--crimson); background:#1a1d27; box-shadow:0 0 0 1px rgba(214,69,80,.15); }
+    .arch-bonus { color:var(--amber); }
+    .primary-btn { width:100%; background:var(--crimson); border:1px solid #ef6972; color:#fff; border-radius:7px; }
+    .reader-frame {
+      width:100%; background:rgba(14,18,25,.97); color:var(--text-main);
+      border:1px solid var(--line); border-radius:10px; padding:19px 21px;
+      box-shadow:0 12px 35px rgba(0,0,0,.42); min-width:0;
+    }
+    .chapter-header, .meta-strip {
+      display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;
+      border-bottom:1px solid var(--line); padding-bottom:11px; margin-bottom:15px;
+      color:var(--text-muted); font:10px ui-monospace,monospace; letter-spacing:.03em;
+    }
+    #chapter-label { color:var(--amber); text-transform:uppercase; }
+    #pages-label { text-align:right; }
+    .t2-banner {
+      display:block; margin:0 0 17px; padding:10px 13px;
+      background:rgba(86,182,194,.08); border-left:3px solid var(--t2);
+      border-radius:0 7px 7px 0; color:#bce6ec; font:12px/1.6 ui-monospace,monospace;
+    }
+    .t2-tag { color:var(--t2); font-weight:800; }
+    .story-text {
+      margin:0; color:var(--text-main); text-align:left !important;
+      font:17px/1.78 var(--font-book); overflow-wrap:break-word; word-break:normal;
+    }
+    .story-text p { margin:0 0 15px; text-indent:1.45em; text-align:left !important; }
+    .story-text p:first-child { text-indent:0; }
+    .story-text p:first-child::first-letter { float:none; font:inherit; color:inherit; padding:0; }
+    .story-text .dlg-hero, .story-text .speech-hero {
+      text-indent:0; margin:14px 0; padding:10px 14px; border-left:3px solid var(--amber);
+      border-radius:0 7px 7px 0; background:rgba(220,163,84,.08); color:#f7e6c4; font-weight:500;
+    }
+    .story-text .dlg-npc, .story-text .speech-npc {
+      text-indent:0; margin:14px 0; padding:10px 14px; border-left:3px solid #56657d;
+      border-radius:0 7px 7px 0; background:rgba(255,255,255,.035); color:#cfd8e6;
+    }
+    .speaker-tag { display:block; margin-bottom:4px; color:var(--amber); font:700 9px ui-monospace,monospace; letter-spacing:.1em; text-transform:uppercase; }
+    .speech-npc .speaker-tag { color:#8fa2bf; }
+    .smooth-reveal { animation:paragraphReveal .42s ease both; }
+    @keyframes paragraphReveal { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:none; } }
+    .skip-typing-bar { display:flex; justify-content:flex-end; margin-top:8px; }
+    .skip-btn { background:var(--bg-card); border:1px solid var(--line); color:var(--text-muted); border-radius:5px; padding:6px 10px; font:10px ui-monospace,monospace; cursor:pointer; }
+    .action-dock {
+      width:100%; background:rgba(14,18,25,.98); color:var(--text-main);
+      border:1px solid var(--line-glow); border-radius:10px; padding:14px 15px;
+      box-shadow:0 10px 30px rgba(0,0,0,.34); opacity:1; transform:none;
+      transition:opacity .3s ease, transform .3s ease, max-height .35s ease, padding .35s ease, margin .35s ease;
+      max-height:1400px; overflow:hidden;
+    }
+    .action-dock.hidden-dock { opacity:0; pointer-events:none; transform:translateY(8px); max-height:0; padding-top:0; padding-bottom:0; margin:0; border-color:transparent; }
+    .dock-label { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:11px; color:var(--text-muted); font:10px ui-monospace,monospace; letter-spacing:.12em; text-transform:uppercase; }
+    .dock-state { color:var(--ok); font-size:9px; }
+    .inspects-block { padding:0; margin:0 0 12px; background:none; border:0; box-shadow:none; }
+    .section-label { color:var(--text-muted); font:700 10px ui-monospace,monospace; letter-spacing:.1em; text-transform:uppercase; margin-bottom:9px; }
+    .inspect-list { display:flex; flex-wrap:wrap; gap:7px; }
+    .inspect-btn { background:var(--bg-card); border:1px solid var(--line); color:var(--text-main); padding:8px 11px; border-radius:6px; font:12px var(--font-ui); text-align:left; }
+    .inspect-btn:hover { border-color:var(--amber); background:var(--bg-elevated); }
+    .inspect-btn.done { color:var(--text-muted); border-color:#3a6b4c; }
+    .inspect-result { margin-top:9px; padding:10px 12px; background:var(--bg-deep); color:#d8dfeb; border-left:2px solid var(--amber); border-radius:4px; font:13px/1.6 var(--font-book); }
+    .deadline-box { background:rgba(214,69,80,.12); border:1px solid var(--crimson); border-radius:6px; color:#ff8a93; margin:0 0 11px; padding:8px 11px; font:10px ui-monospace,monospace; display:flex; justify-content:space-between; align-items:center; gap:8px; }
+    .deadline-timer { color:#ff8a93; font:700 17px ui-monospace,monospace; }
+    .choices-list, .choices-scroll { display:flex; flex-direction:column; gap:7px; }
+    .choices-scroll { max-height:215px; min-height:0; overflow-y:auto; overscroll-behavior:contain; padding-right:4px; scrollbar-width:thin; scrollbar-color:var(--line-glow) transparent; }
+    .choice-btn { background:var(--bg-card); border:1px solid var(--line); color:var(--text-main); padding:10px 12px; border-radius:7px; text-align:left; font:13px/1.45 var(--font-ui); display:flex; justify-content:space-between; align-items:center; gap:9px; transition:background .18s,border-color .18s; }
+    .choice-btn:hover:not(:disabled) { background:var(--bg-elevated); border-color:var(--crimson); transform:none; }
+    .choice-btn:disabled { opacity:.42; cursor:not-allowed; }
+    .choice-req { flex:0 0 auto; font:9px ui-monospace,monospace; padding:3px 6px; border-radius:4px; background:var(--bg-deep); color:var(--amber); white-space:nowrap; }
+    .status-tag { background:#1b2331; color:#bdc9dc; border:1px solid var(--line); }
+    .toast { left:auto; right:16px; bottom:16px; background:var(--bg-elevated); color:var(--text-main); border-color:var(--t2); }
+    .book-ornament { display:none; }
+    code { color:#b8d1e8; }
+    button:focus-visible { outline:2px solid var(--t2); outline-offset:2px; }
+    @media (max-width:680px) {
+      body { width:min(100vw, calc(100dvh * 9 / 16)); height:100dvh; max-height:100dvh; margin:0 auto; }
+      header { padding:calc(7px + env(safe-area-inset-top,0px)) 9px 7px; gap:6px; }
+      .header-top { gap:6px; }
+      .brand-title { font-size:12px; letter-spacing:.1em; }
+      .brand-sub { font-size:8px; padding:2px 5px; }
+      .mode-switch { gap:2px; }
+      .mode-btn { padding:6px 7px; font-size:9px; }
+      .resources { grid-template-columns:repeat(2,minmax(0,1fr)); gap:4px; }
+      .res-pill { padding:4px 6px; }
+      .res-top { font-size:9px; }
+      .nav-tabs { gap:4px; }
+      .tab-btn { padding:6px 8px; font-size:9px; }
+      main { padding:10px 9px calc(14px + env(safe-area-inset-bottom,0px)); }
+      .reader-frame { padding:14px 13px; border-radius:8px; }
+      .chapter-header { font-size:9px; margin-bottom:12px; padding-bottom:9px; }
+      .story-text { font-size:16px; line-height:1.72; }
+      .story-text p { margin-bottom:13px; }
+      .t2-banner { font-size:11px; padding:9px 10px; margin-bottom:13px; }
+      .action-dock { padding:11px 10px; border-radius:8px; }
+      .action-dock.hidden-dock { padding-top:0; padding-bottom:0; }
+      .dock-label { font-size:9px; letter-spacing:.08em; }
+      .inspect-list { flex-direction:column; }
+      .inspect-btn { width:100%; font-size:12px; padding:9px 10px; }
+      .choice-btn { flex-direction:column; align-items:flex-start; padding:10px; font-size:13px; }
+      .choice-req { align-self:flex-start; }
+      .deadline-box { flex-direction:row; align-items:center; font-size:9px; }
+      .toast { left:9px; right:9px; bottom:calc(9px + env(safe-area-inset-bottom,0px)); max-width:none; }
+      .grid-2, .archetype-grid { grid-template-columns:1fr; }
+    }
+    @media (prefers-reduced-motion:reduce) {
+      .smooth-reveal, .screen.active { animation:none !important; }
+      .action-dock { transition:none !important; }
+    }
+  </style>
+
 </head>
 <body>
   <div id="boot-loader" aria-live="polite" aria-label="Загрузка игры">
@@ -1175,15 +1355,21 @@
   </div>
 
   <header>
-    <div class="brand">
-      <div>
-        <div class="brand-title">СЛЕПОЕ ПЯТНО</div>
-        <div class="brand-sub" id="timeline-indicator">ЛИНИЯ #1 // НЕОБРАТИМО</div>
+    <div class="header-top">
+      <div class="brand">
+        <div>
+          <div class="brand-title">СЛЕПОЕ ПЯТНО</div>
+          <div class="brand-sub" id="timeline-indicator">ЛИНИЯ #1 // НЕОБРАТИМО</div>
+        </div>
+      </div>
+      <div class="mode-switch" role="group" aria-label="Режим чтения">
+        <button class="mode-btn active" id="mode-realistic" type="button" aria-pressed="true">Реалистичный</button>
+        <button class="mode-btn" id="mode-fast" type="button" aria-pressed="false">Быстрый</button>
       </div>
     </div>
     <div class="resources" id="resources-bar"></div>
     <nav class="nav-tabs" aria-label="Разделы игры">
-      <button class="tab-btn active" id="tab-story" data-tab="story" type="button">Сюжет</button>
+      <button class="tab-btn active" id="tab-story" data-tab="story" type="button">Книга</button>
       <button class="tab-btn" id="tab-skills" data-tab="skills" type="button">Навыки</button>
       <button class="tab-btn" id="tab-clues" data-tab="clues" type="button">Улики <span class="badge" id="clues-count">0</span></button>
       <button class="tab-btn" id="tab-dossier" data-tab="dossier" type="button">Досье</button>
@@ -1209,23 +1395,30 @@
     </section>
 
     <section id="screen-story" class="screen">
-      <div class="meta-strip">
-        <span id="chapter-label">ПРОЛОГ</span>
-        <span id="pages-label">Книжных страниц прочитано: 0.0</span>
-      </div>
-      <div id="t2-comment-box" class="t2-banner" style="display:none;"></div>
-      <div id="story-content" class="story-text"></div>
-      <div class="book-ornament">❧</div>
-      <div id="inspects-container" class="inspects-block" style="display:none;">
-        <div class="section-label">Точки наблюдения (осмотр сцены)</div>
-        <div class="inspect-list" id="inspect-buttons"></div>
-        <div id="inspect-output" class="inspect-result" style="display:none;"></div>
-      </div>
-      <div id="deadline-container" class="deadline-box" style="display:none;">
-        <span>КРИТИЧЕСКОЕ ОКНО ОТВЕТА — МОЛЧАНИЕ БУДЕТ ЗАФИКСИРОВАНО</span>
-        <span class="deadline-timer" id="deadline-seconds">20s</span>
-      </div>
-      <div id="choices-container" class="choices-list"></div>
+      <article class="reader-frame" aria-live="polite">
+        <div class="chapter-header">
+          <span id="chapter-label">ПРОЛОГ</span>
+          <span id="pages-label">Книжных страниц прочитано: 0.0</span>
+        </div>
+        <div id="t2-comment-box" class="t2-banner" style="display:none;"></div>
+        <div id="story-content" class="story-text"></div>
+        <div id="skip-typing-bar" class="skip-typing-bar" style="display:none;">
+          <button id="skip-typing-btn" class="skip-btn" type="button">Показать текст сразу ▾</button>
+        </div>
+      </article>
+      <section id="action-dock" class="action-dock hidden-dock" aria-label="Осмотр окружения и выбор действия">
+        <div class="dock-label"><span>Осмотр окружения и выбор действия</span><span class="dock-state">АКТИВНО</span></div>
+        <div id="inspects-container" class="inspects-block" style="display:none;">
+          <div class="section-label">Точки наблюдения</div>
+          <div class="inspect-list" id="inspect-buttons"></div>
+          <div id="inspect-output" class="inspect-result" style="display:none;"></div>
+        </div>
+        <div id="deadline-container" class="deadline-box" style="display:none;">
+          <span>КРИТИЧЕСКОЕ ВРЕМЯ ОТВЕТА — МОЛЧАНИЕ БУДЕТ ЗАФИКСИРОВАНО</span>
+          <span class="deadline-timer" id="deadline-seconds">20s</span>
+        </div>
+        <div id="choices-container" class="choices-list choices-scroll" aria-label="Варианты выбора"></div>
+      </section>
     </section>
 
     <section id="screen-skills" class="screen">
@@ -1390,83 +1583,8 @@ end_04: 'chapters/end_04.js'
 • РЕЕСТР СЮЖЕТНЫХ УЗЛОВ И ВСТРОЕННАЯ СТАРТОВАЯ СЦЕНА (ДЛЯ ПРОВЕРКИ ДВИЖКА)
 • ============================================================================
 */
-window.STORY_NODES = {
-prologue_start: {
-chapter: 'ПРОЛОГ // ТОЧКА ВХОДА',
-t2Comment: 'Линия #1 инициализирована. Наблюдаю за первичным откликом Аэ́рхиса. Не спеши верить тому, что видишь в зеркале.',
-text: [
-'Будильник не звенел, но ты открыл глаза ровно в 03:14. На потолке, прямо над кроватью, едва заметно мигал крошечный красный диод датчика дыма — слишком ритмично для обычной электроники.',
-{ type: 'npc', text: '«Аэ́рхис, ты уже не спишь? Нам нужно сверить утренний протокол до прихода Веры» — голос Миры донёсся из интеркома в прихожей.' },
-{ type: 'hero', text: '«Я ещё не подходил к двери. Откуда ты знаешь, что я проснулся?»' },
-'В динамике повисла пауза ровно на три секунды. Слишком долгая для случайной заминки и слишком короткая для искреннего удивления.'
-],
-inspects: [
-{
-id: 'insp_mirror',
-label: 'Осмотреть тумбочку и часы',
-text: 'Секундная стрелка наручных часов замерла на 03:14, хотя электронное табло на стене уже показывает 03:17. На обратной стороне корпуса царапина в виде буквы «Т» и цифры «2».',
-clue: { id: 'clue_stopped_watch', title: 'Остановленные часы (03:14)', desc: 'Механические часы встали в момент пробуждения. На крышке выцарапано «Т2».' },
-skillGain: { details: 1 }
-},
-{
-id: 'insp_intercom',
-label: 'Проверить панель интеркома',
-text: 'Индикатор микрофона горит зелёным, хотя кнопку вызова никто не нажимал. Канал прослушивания был открыт всю ночь.',
-clue: { id: 'clue_live_mic', title: 'Активный канал интеркома', desc: 'Микрофон в квартире Аэ́рхиса транслировал звук наружу без входящего звонка.' },
-statDelta: { ammo: 1 }
-}
-],
-deadline: 25,
-timeoutChoiceIndex: 2,
-choices: [
-{
-text: 'Ответить спокойно, скрыв, что заметил прослушку',
-reqSkill: { skill: 'mimicry', min: 2 },
-statDelta: { o2: 5, energy: -5 },
-t2Shift: 1,
-next: 'prologue_corridor_demo'
-},
-{
-text: 'Потребовать объяснить, почему микрофон был включён ночью',
-reqSkill: { skill: 'provocation', min: 2 },
-statDelta: { o2: -10, ammo: 2 },
-t2Shift: -1,
-next: 'prologue_corridor_demo'
-},
-{
-text: '[Молчание / Истечение времени] Подойти к двери без единого слова',
-statDelta: { hp: -5, o2: -5 },
-t2Shift: 0,
-next: 'prologue_corridor_demo'
-}
-]
-},
-prologue_corridor_demo: {
-chapter: 'ПРОЛОГ // ДЕМОНСТРАЦИЯ ФИНАЛА ЛИНИИ',
-t2Comment: 'Ты сделал первый необратимый шаг. В полноценной главе здесь развернётся ветка на десятки узлов, но сейчас я открою тебе доступ к Хронологии.',
-isEnding: true,
-endingTitle: 'Нулевая точка: Контур обнаружен',
-text: [
-'За дверью никого не оказалось — только запечатанный конверт без имени отправителя и тихий гул вентиляции, в котором угадывалось чужое дыхание.',
-'Твой первый след записан в архив. Теперь ты можешь открыть вкладку «Хронология Т2» в верхнем меню, увидеть сохранённую линию и попробовать изменить своё первое решение.'
-],
-choices: [
-{
-text: 'Открыть Хронологию Т2 и изучить ветвление',
-action: 'openChronology'
-}
-]
-}
-};
-window.CHAPTER_CALLS = [
-{
-id: 'call_ilya_01',
-from: 'Илья Кравцов',
-triggerClue: 'clue_live_mic',
-delaySec: 4,
-text: '«Не говори в прихожей. Если ты нашёл активный канал — проверь выписку за прошлый вторник. Тебя там нет».'
-}
-];
+window.STORY_NODES = {};
+window.CHAPTER_CALLS = [];
 /**
 • ============================================================================
 • ЯДРО СОСТОЯНИЯ ДВИЖКА
@@ -1474,6 +1592,8 @@ text: '«Не говори в прихожей. Если ты нашёл акт�
 */
 let state = {
 started: false,
+readingMode: 'realistic',
+readNodeIds: [],
 archetypeId: 'analyst',
 timelineIndex: 1,
 chronologyUnlocked: false,
@@ -1492,6 +1612,13 @@ unlockedCalls: [],
 flags: {}
 };
 let deadlineInterval = null;
+let typingTimer = null;
+let dockRevealTimer = null;
+let renderVersion = 0;
+let activeNodeForReading = null;
+let activeParagraphs = [];
+let activeParagraphIndex = 0;
+let currentRenderedNode = null;
 let loadedChapterFiles = {};
 // API для подключения внешних модулей глав (chapters/ch01.js и т.д.)
 window.registerChapter = function(chapterId, nodesObj, callsArr = []) {
@@ -1550,6 +1677,9 @@ try {
 const raw = localStorage.getItem(SAVE_KEY);
 if (!raw) return false;
 state = Object.assign(state, JSON.parse(raw));
+if (!['realistic', 'fast'].includes(state.readingMode)) state.readingMode = 'realistic';
+if (!Array.isArray(state.readNodeIds)) state.readNodeIds = [];
+if (state.currentNodeId && Number(state.charsRead) > 0 && state.readNodeIds.length === 0) state.readNodeIds.push(state.currentNodeId);
 return true;
 } catch (e) {
 console.warn('Сохранение не удалось прочитать:', e);
@@ -1570,7 +1700,27 @@ initArchetypesUI();
 box.appendChild(div);
 });
 }
+function syncReadingModeButtons() {
+const realistic = document.getElementById('mode-realistic');
+const fast = document.getElementById('mode-fast');
+if (!realistic || !fast) return;
+realistic.classList.toggle('active', state.readingMode !== 'fast');
+fast.classList.toggle('active', state.readingMode === 'fast');
+realistic.setAttribute('aria-pressed', String(state.readingMode !== 'fast'));
+fast.setAttribute('aria-pressed', String(state.readingMode === 'fast'));
+}
+function setReadingMode(mode) {
+state.readingMode = mode === 'fast' ? 'fast' : 'realistic';
+ syncReadingModeButtons();
+ saveState();
+ if (state.readingMode === 'fast' && activeNodeForReading) finishReadingImmediately();
+}
+document.getElementById('mode-realistic').addEventListener('click', () => setReadingMode('realistic'));
+document.getElementById('mode-fast').addEventListener('click', () => setReadingMode('fast'));
+document.getElementById('skip-typing-btn').addEventListener('click', finishReadingImmediately);
 document.getElementById('btn-start-game').onclick = () => {
+clearReadingTimers();
+clearDeadline();
 const arch = ARCHETYPES.find(a => a.id === state.archetypeId) || ARCHETYPES[0];
 state.started = true;
 state.stats = { ...arch.stats };
@@ -1580,6 +1730,9 @@ state.clues = [];
 state.inspectedDone = {};
 state.visitedNodes = [];
 state.currentNodeId = 'prologue_start';
+state.readingMode = state.readingMode || 'realistic';
+state.readNodeIds = [];
+state.charsRead = 0;
 saveState();
 switchTab('story');
 renderNode('prologue_start');
@@ -1617,33 +1770,112 @@ if (!RESOURCES_META[key]) return;
 const max = RESOURCES_META[key].max;
 state.stats[key] = Math.max(0, Math.min(max, (state.stats[key] || 0) + delta));
 }
+function clearReadingTimers() {
+if (typingTimer) { clearTimeout(typingTimer); typingTimer = null; }
+if (dockRevealTimer) { clearTimeout(dockRevealTimer); dockRevealTimer = null; }
+activeNodeForReading = null;
+activeParagraphs = [];
+activeParagraphIndex = 0;
+currentRenderedNode = null;
+}
 function clearDeadline() {
 if (deadlineInterval) {
 clearInterval(deadlineInterval);
 deadlineInterval = null;
 }
-document.getElementById('deadline-container').style.display = 'none';
+const deadlineBox = document.getElementById('deadline-container');
+if (deadlineBox) deadlineBox.style.display = 'none';
+}
+function createStoryParagraph(block) {
+const p = document.createElement('p');
+p.classList.add('smooth-reveal');
+if (typeof block === 'string') {
+p.textContent = block;
+} else if (block && block.type === 'hero') {
+p.className = 'speech-hero smooth-reveal';
+const tag = document.createElement('span');
+tag.className = 'speaker-tag';
+tag.textContent = 'Аэ́рхис';
+p.appendChild(tag);
+p.appendChild(document.createTextNode(block.text || ''));
+} else if (block && block.type === 'npc') {
+p.className = 'speech-npc smooth-reveal';
+const tag = document.createElement('span');
+tag.className = 'speaker-tag';
+tag.textContent = 'Собеседник // Эфир';
+p.appendChild(tag);
+p.appendChild(document.createTextNode(block.text || ''));
+} else if (block && typeof block.text === 'string') {
+p.textContent = block.text;
+} else {
+p.textContent = String(block ?? '');
+}
+return p;
+}
+function revealActionDock(token) {
+if (token !== renderVersion) return;
+const dock = document.getElementById('action-dock');
+const skipBar = document.getElementById('skip-typing-bar');
+if (skipBar) skipBar.style.display = 'none';
+if (dock) dock.classList.remove('hidden-dock');
+activeNodeForReading = null;
+if (currentRenderedNode && currentRenderedNode.deadline && currentRenderedNode.choices && currentRenderedNode.choices.length) {
+startNodeDeadline(currentRenderedNode, token);
+}
+}
+function finishReadingImmediately() {
+if (!activeNodeForReading) return;
+if (typingTimer) { clearTimeout(typingTimer); typingTimer = null; }
+if (dockRevealTimer) { clearTimeout(dockRevealTimer); dockRevealTimer = null; }
+const container = document.getElementById('story-content');
+while (activeParagraphIndex < activeParagraphs.length) {
+container.appendChild(activeParagraphs[activeParagraphIndex]);
+activeParagraphIndex++;
+}
+revealActionDock(renderVersion);
+}
+function startNodeDeadline(node, token) {
+if (!node || !node.deadline || !node.choices || !node.choices.length || token !== renderVersion) return;
+let left = Number(node.deadline) || 0;
+if (left <= 0) return;
+const dBox = document.getElementById('deadline-container');
+const dSec = document.getElementById('deadline-seconds');
+dBox.style.display = 'flex';
+dSec.textContent = left + 's';
+deadlineInterval = setInterval(() => {
+if (token !== renderVersion) { clearDeadline(); return; }
+left--;
+dSec.textContent = left + 's';
+if (left <= 0) {
+clearDeadline();
+const fallbackIdx = node.timeoutChoiceIndex ?? (node.choices.length - 1);
+const fallbackChoice = node.choices[fallbackIdx];
+if (fallbackChoice) selectChoice(fallbackChoice);
+}
+}, 1000);
 }
 async function renderNode(nodeId, isRewind = false) {
+clearReadingTimers();
 clearDeadline();
-// Автоподгрузка модуля по самому длинному совпадающему ключу.
-// Важно: модуль загружается и тогда, когда в HTML есть демонстрационный
-// узел с таким же ID — внешний файл должен иметь возможность его заменить.
+const token = ++renderVersion;
+// Автоподгрузка по самому длинному совпадающему ключу: работает и с end_01/end_02.
 const chapterKey = resolveChapterKey(nodeId);
 if (chapterKey && !loadedChapterFiles[chapterKey]) {
-  await loadChapterScript(chapterKey);
+await loadChapterScript(chapterKey);
 }
+if (token !== renderVersion) return;
 const node = window.STORY_NODES[nodeId];
 if (!node) {
 const expectedFile = chapterKey ? CHAPTER_FILES[chapterKey] : null;
 const detail = expectedFile
-  ? `Ожидаемый файл модуля: <code>${expectedFile}</code>.`
-  : 'Для этого узла не найден ключ модуля в CHAPTER_FILES.';
+? `Ожидаемый файл модуля: <code>${expectedFile}</code>. Проверьте, что файл находится по этому относительному пути.`
+: 'Для этого узла не найден ключ модуля в CHAPTER_FILES.';
 document.getElementById('story-content').innerHTML = `<p>Узел <code>${nodeId}</code> пока не зарегистрирован.</p><p>${detail}</p>`;
+document.getElementById('action-dock').classList.add('hidden-dock');
+document.getElementById('skip-typing-bar').style.display = 'none';
 return;
 }
 state.currentNodeId = nodeId;
-// Запись узла в историю текущей линии (снимок состояния для Хронологии Т2)
 if (!isRewind) {
 const snapshot = {
 nodeId,
@@ -1657,7 +1889,6 @@ const existingIdx = state.visitedNodes.findIndex(v => v.nodeId === nodeId);
 if (existingIdx === -1) state.visitedNodes.push(snapshot);
 }
 document.getElementById('chapter-label').textContent = node.chapter || 'ГЛАВА';
-// Комментарий Т2
 const t2Box = document.getElementById('t2-comment-box');
 if (node.t2Comment) {
 t2Box.style.display = 'block';
@@ -1665,30 +1896,20 @@ t2Box.innerHTML = `<span class="t2-tag">[T2]:</span> ${node.t2Comment}`;
 } else {
 t2Box.style.display = 'none';
 }
-// Текст сцены и подсчёт книжных страниц (1600 знаков)
 const contentBox = document.getElementById('story-content');
 contentBox.innerHTML = '';
+const blocks = Array.isArray(node.text) ? node.text : [];
 let nodeChars = 0;
-node.text.forEach(block => {
-const p = document.createElement('p');
-if (typeof block === 'string') {
-p.textContent = block;
-nodeChars += block.length;
-} else if (block.type === 'hero') {
-p.className = 'dlg-hero';
-p.textContent = block.text;
-nodeChars += block.text.length;
-} else if (block.type === 'npc') {
-p.className = 'dlg-npc';
-p.textContent = block.text;
-nodeChars += block.text.length;
+blocks.forEach(block => { nodeChars += typeof block === 'string' ? block.length : String(block && block.text || '').length; });
+if (!Array.isArray(state.readNodeIds)) state.readNodeIds = [];
+if (!state.readNodeIds.includes(nodeId)) {
+state.readNodeIds.push(nodeId);
+state.charsRead = (Number(state.charsRead) || 0) + nodeChars;
 }
-contentBox.appendChild(p);
-});
-state.charsRead += nodeChars;
-const pages = (state.charsRead / CHARS_PER_PAGE).toFixed(1);
+const pages = ((Number(state.charsRead) || 0) / CHARS_PER_PAGE).toFixed(1);
 document.getElementById('pages-label').textContent = `Книжных страниц прочитано: ${pages}`;
-// Осмотры (inspects)
+
+// Подготовить осмотры и выборы до открытия нижней панели.
 const inspContainer = document.getElementById('inspects-container');
 const inspBtns = document.getElementById('inspect-buttons');
 const inspOut = document.getElementById('inspect-output');
@@ -1700,7 +1921,7 @@ node.inspects.forEach(insp => {
 const btn = document.createElement('button');
 const done = !!state.inspectedDone[insp.id];
 btn.className = 'inspect-btn' + (done ? ' done' : '');
-btn.textContent = (done ? '✓ ' : '• ') + insp.label;
+btn.textContent = (done ? '✓ ' : '◉ ') + insp.label;
 btn.onclick = () => {
 inspOut.style.display = 'block';
 inspOut.textContent = insp.text;
@@ -1712,18 +1933,9 @@ if (insp.clue && !state.clues.some(c => c.id === insp.clue.id)) {
 state.clues.push(insp.clue);
 checkCallsTriggers(insp.clue.id);
 }
-if (insp.statDelta) {
-Object.entries(insp.statDelta).forEach(([k, v]) => changeStat(k, v));
-}
-// Некоторые точки осмотра открывают предметы непосредственно в инвентарь.
-if (insp.giveItem && !state.inventory.includes(insp.giveItem)) {
-  state.inventory.push(insp.giveItem);
-}
-if (insp.skillGain) {
-Object.entries(insp.skillGain).forEach(([sk, v]) => {
-state.skills[sk] = (state.skills[sk] || 0) + v;
-});
-}
+if (insp.statDelta) Object.entries(insp.statDelta).forEach(([k, v]) => changeStat(k, v));
+if (insp.giveItem && !state.inventory.includes(insp.giveItem)) state.inventory.push(insp.giveItem);
+if (insp.skillGain) Object.entries(insp.skillGain).forEach(([sk, v]) => { state.skills[sk] = (state.skills[sk] || 0) + v; });
 renderResources();
 saveState();
 }
@@ -1733,24 +1945,17 @@ inspBtns.appendChild(btn);
 } else {
 inspContainer.style.display = 'none';
 }
-// Если узел финальный — фиксируем линию в Хронологии Т2
+
 if (node.isEnding) {
 state.chronologyUnlocked = true;
 const archiveId = `line_${state.timelineIndex}_${nodeId}`;
 if (!state.timelinesArchive.some(t => t.id === archiveId)) {
-state.timelinesArchive.push({
-id: archiveId,
-lineNum: state.timelineIndex,
-endingTitle: node.endingTitle || 'Финал линии',
-nodesCount: state.visitedNodes.length,
-t2Affinity: state.t2Affinity
-});
+state.timelinesArchive.push({ id: archiveId, lineNum: state.timelineIndex, endingTitle: node.endingTitle || 'Финал линии', nodesCount: state.visitedNodes.length, t2Affinity: state.t2Affinity });
 }
 }
-// Варианты выбора
 const choicesBox = document.getElementById('choices-container');
 choicesBox.innerHTML = '';
-(node.choices || []).forEach((ch, idx) => {
+(node.choices || []).forEach(ch => {
 const btn = document.createElement('button');
 btn.className = 'choice-btn';
 let allowed = true;
@@ -1762,8 +1967,7 @@ allowed = cur >= ch.reqSkill.min;
 reqLabel = `${skName} ${cur}/${ch.reqSkill.min}`;
 } else if (ch.reqItem) {
 allowed = state.inventory.includes(ch.reqItem);
-const itemName = ITEMS_DB[ch.reqItem]?.name || ch.reqItem;
-reqLabel = `Предмет: ${itemName}`;
+reqLabel = `Предмет: ${ITEMS_DB[ch.reqItem]?.name || ch.reqItem}`;
 } else if (ch.reqClue) {
 allowed = state.clues.some(c => c.id === ch.reqClue);
 reqLabel = 'Требуется улика';
@@ -1773,26 +1977,38 @@ btn.innerHTML = `<span>${ch.text}</span>${reqLabel ? `<span class="choice-req">$
 btn.onclick = () => selectChoice(ch);
 choicesBox.appendChild(btn);
 });
-// Таймер дедлайна (если задан в узле)
-if (node.deadline && node.choices && node.choices.length > 0) {
-let left = node.deadline;
-const dBox = document.getElementById('deadline-container');
-const dSec = document.getElementById('deadline-seconds');
-dBox.style.display = 'flex';
-dSec.textContent = left + 's';
-deadlineInterval = setInterval(() => {
-left--;
-dSec.textContent = left + 's';
-if (left <= 0) {
-clearDeadline();
-const fallbackIdx = node.timeoutChoiceIndex ?? (node.choices.length - 1);
-const fallbackChoice = node.choices[fallbackIdx];
-if (fallbackChoice) selectChoice(fallbackChoice);
-}
-}, 1000);
-}
+
 renderResources();
 saveState();
+
+// Реалистичный режим показывает сцены абзац за абзацем.
+// Таймер сюжетного выбора стартует только после полного открытия панели действий.
+activeNodeForReading = node;
+currentRenderedNode = node;
+activeParagraphs = blocks.map(createStoryParagraph);
+activeParagraphIndex = 0;
+const dock = document.getElementById('action-dock');
+const skipBar = document.getElementById('skip-typing-bar');
+dock.classList.add('hidden-dock');
+skipBar.style.display = 'none';
+if (state.readingMode === 'fast' || activeParagraphs.length <= 1) {
+activeParagraphs.forEach(p => contentBox.appendChild(p));
+activeParagraphIndex = activeParagraphs.length;
+revealActionDock(token);
+} else {
+skipBar.style.display = 'flex';
+const revealNext = () => {
+if (token !== renderVersion || !activeNodeForReading) return;
+if (activeParagraphIndex < activeParagraphs.length) {
+contentBox.appendChild(activeParagraphs[activeParagraphIndex]);
+activeParagraphIndex++;
+typingTimer = setTimeout(revealNext, 430);
+} else {
+dockRevealTimer = setTimeout(() => revealActionDock(token), 620);
+}
+};
+revealNext();
+}
 }
 function selectChoice(ch) {
 clearDeadline();
@@ -1982,6 +2198,7 @@ rewindList.appendChild(card);
   loadState();
   initArchetypesUI();
   renderResources();
+  syncReadingModeButtons();
   // Узел сюжета отрисовывается по кнопке «ПРОДОЛЖИТЬ» на обложке,
   // чтобы таймер дедлайна не шёл за закрытой обложкой.
 })();
