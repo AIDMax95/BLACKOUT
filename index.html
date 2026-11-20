@@ -976,14 +976,26 @@ if (typeof loadedChapterFiles !== 'undefined' && chapterId) {
 loadedChapterFiles[chapterId] = true;
 }
 };
+function resolveChapterKey(nodeId) {
+if (typeof nodeId !== 'string' || !nodeId) return null;
+// Сопоставляем самый длинный ключ. Нельзя заменять это на split('_')[0]:
+// составные ключи end_01, end_02 и т. п. потеряют свою вторую часть.
+return Object.keys(CHAPTER_FILES)
+  .sort((a, b) => b.length - a.length)
+  .find(key => nodeId === key || nodeId.startsWith(key + '_')) || null;
+}
 function loadChapterScript(chapterKey) {
 return new Promise((resolve) => {
 const src = CHAPTER_FILES[chapterKey];
-if (!src || loadedChapterFiles[chapterKey]) return resolve();
+if (!src || loadedChapterFiles[chapterKey]) return resolve(true);
 const script = document.createElement('script');
 script.src = src;
-script.onload = () => { loadedChapterFiles[chapterKey] = true; resolve(); };
-script.onerror = () => { console.warn('Модуль главы ещё не создан:', src); resolve(); };
+script.onload = () => { loadedChapterFiles[chapterKey] = true; resolve(true); };
+script.onerror = () => {
+  console.warn('Не удалось загрузить модуль главы:', src);
+  script.remove();
+  resolve(false);
+};
 document.head.appendChild(script);
 });
 }
@@ -1083,15 +1095,17 @@ clearDeadline();
 // Автоподгрузка модуля по самому длинному совпадающему ключу.
 // Важно: модуль загружается и тогда, когда в HTML есть демонстрационный
 // узел с таким же ID — внешний файл должен иметь возможность его заменить.
-const chapterKey = Object.keys(CHAPTER_FILES)
-  .sort((a, b) => b.length - a.length)
-  .find(key => nodeId === key || nodeId.startsWith(key + '_'));
+const chapterKey = resolveChapterKey(nodeId);
 if (chapterKey && !loadedChapterFiles[chapterKey]) {
   await loadChapterScript(chapterKey);
 }
 const node = window.STORY_NODES[nodeId];
 if (!node) {
-document.getElementById('story-content').innerHTML = `<p>Узел <code>${nodeId}</code> ожидает подключения файла главы в папке <code>chapters/</code>.</p>`;
+const expectedFile = chapterKey ? CHAPTER_FILES[chapterKey] : null;
+const detail = expectedFile
+  ? `Ожидаемый файл модуля: <code>${expectedFile}</code>.`
+  : 'Для этого узла не найден ключ модуля в CHAPTER_FILES.';
+document.getElementById('story-content').innerHTML = `<p>Узел <code>${nodeId}</code> пока не зарегистрирован.</p><p>${detail}</p>`;
 return;
 }
 state.currentNodeId = nodeId;
