@@ -276,24 +276,7 @@
       font-family: var(--font-book);
       font-size: 15.5px;
     }
-
-    .deadline-box {
-      background: rgba(139, 38, 45, 0.12);
-      border: 1px solid var(--ink-accent);
-      padding: 10px 14px;
-      border-radius: 5px;
-      margin-bottom: 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-family: var(--font-mono);
-      font-size: 12px;
-      color: var(--ink-accent);
-    }
-
-    .deadline-timer { font-size: 18px; font-weight: 700; color: var(--ink-accent); }
-
-    .choices-list { display: flex; flex-direction: column; gap: 10px; }
+.choices-list { display: flex; flex-direction: column; gap: 10px; }
 
     .choice-btn {
       background: rgba(255, 251, 242, 0.72);
@@ -412,8 +395,7 @@
       .t2-banner { padding: 10px 12px; font-size: 13.5px; }
       .inspect-list { flex-direction: column; }
       .inspect-btn { width: 100%; text-align: left; padding: 11px 12px; }
-      .deadline-box { flex-direction: column; align-items: flex-start; gap: 6px; font-size: 11px; }
-      .choice-btn { flex-direction: column; align-items: flex-start; padding: 13px 14px; font-size: 15px; gap: 8px; }
+.choice-btn { flex-direction: column; align-items: flex-start; padding: 13px 14px; font-size: 15px; gap: 8px; }
       .choice-req { align-self: flex-start; }
       .toast { left: 12px; right: 12px; bottom: 14px; max-width: none; }
     }
@@ -1266,9 +1248,7 @@
     .inspect-btn:hover { border-color:var(--amber); background:var(--bg-elevated); }
     .inspect-btn.done { color:var(--text-muted); border-color:#3a6b4c; }
     .inspect-result { margin-top:9px; padding:10px 12px; background:var(--bg-deep); color:#d8dfeb; border-left:2px solid var(--amber); border-radius:4px; font:13px/1.6 var(--font-book); }
-    .deadline-box { background:rgba(214,69,80,.12); border:1px solid var(--crimson); border-radius:6px; color:#ff8a93; margin:0 0 11px; padding:8px 11px; font:10px ui-monospace,monospace; display:flex; justify-content:space-between; align-items:center; gap:8px; }
-    .deadline-timer { color:#ff8a93; font:700 17px ui-monospace,monospace; }
-    .choices-list, .choices-scroll { display:flex; flex-direction:column; gap:7px; }
+.choices-list, .choices-scroll { display:flex; flex-direction:column; gap:7px; }
     .choices-scroll { max-height:215px; min-height:0; overflow-y:auto; overscroll-behavior:contain; padding-right:4px; scrollbar-width:thin; scrollbar-color:var(--line-glow) transparent; }
     .choice-btn { background:var(--bg-card); border:1px solid var(--line); color:var(--text-main); padding:10px 12px; border-radius:7px; text-align:left; font:13px/1.45 var(--font-ui); display:flex; justify-content:space-between; align-items:center; gap:9px; transition:background .18s,border-color .18s; }
     .choice-btn:hover:not(:disabled) { background:var(--bg-elevated); border-color:var(--crimson); transform:none; }
@@ -1305,8 +1285,7 @@
       .inspect-btn { width:100%; font-size:12px; padding:9px 10px; }
       .choice-btn { flex-direction:column; align-items:flex-start; padding:10px; font-size:13px; }
       .choice-req { align-self:flex-start; }
-      .deadline-box { flex-direction:row; align-items:center; font-size:9px; }
-      .toast { left:9px; right:9px; bottom:calc(9px + env(safe-area-inset-bottom,0px)); max-width:none; }
+.toast { left:9px; right:9px; bottom:calc(9px + env(safe-area-inset-bottom,0px)); max-width:none; }
       .grid-2, .archetype-grid { grid-template-columns:1fr; }
     }
     @media (prefers-reduced-motion:reduce) {
@@ -1498,10 +1477,9 @@
           <div class="brand-sub" id="timeline-indicator">ЛИНИЯ #1 // НЕОБРАТИМО</div>
         </div>
       </div>
-      <div class="mode-switch" role="group" aria-label="Режим чтения и таймера">
+      <div class="mode-switch" role="group" aria-label="Режим чтения">
         <button class="mode-btn active" id="mode-realistic" type="button" aria-pressed="true">Реалистичный</button>
         <button class="mode-btn" id="mode-fast" type="button" aria-pressed="false">Быстрый</button>
-        <button class="mode-btn active" id="mode-timer" type="button" aria-pressed="true">Таймер: 60с+</button>
       </div>
     </div>
     <div class="resources" id="resources-bar"></div>
@@ -1549,10 +1527,6 @@
           <div class="section-label">Точки наблюдения</div>
           <div class="inspect-list" id="inspect-buttons"></div>
           <div id="inspect-output" class="inspect-result" style="display:none;"></div>
-        </div>
-        <div id="deadline-container" class="deadline-box" style="display:none;">
-          <span>КРИТИЧЕСКОЕ ВРЕМЯ ОТВЕТА — МОЛЧАНИЕ БУДЕТ ЗАФИКСИРОВАНО</span>
-          <span class="deadline-timer" id="deadline-seconds">20s</span>
         </div>
         <div id="choices-container" class="choices-list choices-scroll" aria-label="Варианты выбора"></div>
       </section>
@@ -1700,6 +1674,7 @@ ilya:  { name: 'Илья Кравцов', role: 'Коллега по архив�
 vera:  { name: 'Вера Орлова', role: 'Психолог-куратор', trust: 40, status: 'Активна', note: 'Ведёт протокол стабильности. Утверждает, что половина воспоминаний Аэ́рхиса — реконструкция.' },
 voss:  { name: 'Артур Восс', role: 'Руководитель внешнего контура', trust: 20, status: 'Неизвестно', note: 'Имя встречается в удалённых отчётах. Лично в кадре не появляется.' }
 };
+// Редакция 2: новый Пролог; старые незавершённые сохранения мигрируют к prologue_start.
 const CHAPTER_FILES = {
 prologue: 'chapters/prologue.js',
 ch01: 'chapters/ch01.js',
@@ -1730,7 +1705,7 @@ window.CHAPTER_CALLS = [];
 let state = {
 started: false,
 readingMode: 'realistic',
-timersEnabled: true,
+timersEnabled: false,
 readNodeIds: [],
 archetypeId: 'analyst',
 timelineIndex: 1,
@@ -1738,6 +1713,7 @@ chronologyUnlocked: false,
 t2Affinity: 0,
 charsRead: 0,
 currentNodeId: 'prologue_start',
+prologueRevision: 2,
 stats: { hp: 100, o2: 80, energy: 100, ammo: 3 },
 skills: {},
 clues: [],
@@ -1751,7 +1727,6 @@ unlockedCalls: [],
 flags: {}
 };
 let deadlineInterval = null;
-let timerPauseUntil = 0;
 let typingTimer = null;
 let dockRevealTimer = null;
 let renderVersion = 0;
@@ -1816,10 +1791,35 @@ function loadState() {
 try {
 const raw = localStorage.getItem(SAVE_KEY);
 if (!raw) return false;
-state = Object.assign(state, JSON.parse(raw));
+const loaded = JSON.parse(raw);
+const savedPrologueRevision = Number(loaded && loaded.prologueRevision) || 1;
+state = Object.assign(state, loaded);
 if (!['realistic', 'fast'].includes(state.readingMode)) state.readingMode = 'realistic';
-// В старых сохранениях этого параметра нет — по умолчанию таймеры включены.
-if (typeof state.timersEnabled !== 'boolean') state.timersEnabled = true;
+// Таймеры полностью отключены в этой редакции — даже старые сохранения не могут их включить.
+state.timersEnabled = false;
+// Новая редакция Пролога заменяет старые сюжетные узлы. Старый незавершённый маршрут
+// переводится к началу новой версии, при этом архив завершённых линий и номер линии сохраняются.
+if (savedPrologueRevision < 2) {
+  const selectedArchetype = ARCHETYPES.find(a => a.id === state.archetypeId) || ARCHETYPES[0];
+  state.stats = { ...selectedArchetype.stats };
+  state.skills = { ...selectedArchetype.skills };
+  state.inventory = [...selectedArchetype.items];
+  state.clues = [];
+  state.dossier = JSON.parse(JSON.stringify(INITIAL_DOSSIER));
+  state.inspectedDone = {};
+  state.inspectionCharsCounted = {};
+  state.readNodeIds = [];
+  state.visitedNodes = [];
+  state.unlockedCalls = [];
+  state.flags = {};
+  state.charsRead = 0;
+  state.t2Affinity = 0;
+  state.currentNodeId = 'prologue_start';
+  state.prologueRevision = 2;
+  saveState();
+} else {
+  state.prologueRevision = 2;
+}
 if (!Array.isArray(state.readNodeIds)) state.readNodeIds = [];
 if (!state.inspectedDone || typeof state.inspectedDone !== 'object') state.inspectedDone = {};
 if (!state.inspectionCharsCounted || typeof state.inspectionCharsCounted !== 'object') state.inspectionCharsCounted = {};
@@ -1859,29 +1859,8 @@ state.readingMode = mode === 'fast' ? 'fast' : 'realistic';
  saveState();
  if (state.readingMode === 'fast' && activeNodeForReading) finishReadingImmediately();
 }
-function syncTimerButton() {
-const button = document.getElementById('mode-timer');
-if (!button) return;
-button.classList.toggle('active', !!state.timersEnabled);
-button.textContent = state.timersEnabled ? 'Таймер: 60с+' : 'Без таймера';
-button.setAttribute('aria-pressed', String(!!state.timersEnabled));
-}
 document.getElementById('mode-realistic').addEventListener('click', () => setReadingMode('realistic'));
 document.getElementById('mode-fast').addEventListener('click', () => setReadingMode('fast'));
-document.getElementById('mode-timer').addEventListener('click', () => {
-state.timersEnabled = !state.timersEnabled;
-syncTimerButton();
-if (!state.timersEnabled) {
-  clearDeadline();
-} else {
-  const dock = document.getElementById('action-dock');
-  const dockIsVisible = dock && !dock.classList.contains('hidden-dock');
-  if (currentRenderedNode && !activeNodeForReading && dockIsVisible) {
-    startNodeDeadline(currentRenderedNode, renderVersion);
-  }
-}
-saveState();
-});
 document.getElementById('skip-typing-btn').addEventListener('click', finishReadingImmediately);
 document.getElementById('btn-start-game').onclick = () => {
 clearReadingTimers();
@@ -1949,7 +1928,6 @@ if (deadlineInterval) {
 clearInterval(deadlineInterval);
 deadlineInterval = null;
 }
-timerPauseUntil = 0;
 const deadlineBox = document.getElementById('deadline-container');
 if (deadlineBox) deadlineBox.style.display = 'none';
 }
@@ -2060,42 +2038,9 @@ activeParagraphIndex++;
 }
 revealActionDock(renderVersion);
 }
-function pauseDeadlineForReading(extraSec = 15) {
-timerPauseUntil = Date.now() + Math.max(0, Number(extraSec) || 0) * 1000;
-}
-function startNodeDeadline(node, token) {
-// Не начинаем отсчёт, пока сцена не прочитана и нижняя панель не открыта.
-if (!state.timersEnabled || !node || !node.deadline || !node.choices || !node.choices.length || token !== renderVersion) {
-  clearDeadline();
-  return;
-}
-// При повторном запуске не допускаем двух параллельных интервалов.
+function startNodeDeadline() {
+// Таймеры выбора отключены глобально для Пролога и всех последующих глав.
 clearDeadline();
-// Дополнительные 40 секунд и нижний предел в 60 секунд на чтение выбора.
-let left = Math.max(60, (Number(node.deadline) || 20) + 40);
-const dBox = document.getElementById('deadline-container');
-const dSec = document.getElementById('deadline-seconds');
-if (!dBox || !dSec) return;
-dBox.style.display = 'flex';
-dSec.textContent = left + 's';
-deadlineInterval = setInterval(() => {
-  if (token !== renderVersion) { clearDeadline(); return; }
-
-  // Осмотр добавляет 15 секунд спокойного чтения, не уменьшая остаток таймера.
-  if (Date.now() < timerPauseUntil) {
-    dSec.textContent = left + 's (пауза)';
-    return;
-  }
-
-  left--;
-  dSec.textContent = left + 's';
-  if (left <= 0) {
-    clearDeadline();
-    const fallbackIdx = node.timeoutChoiceIndex ?? (node.choices.length - 1);
-    const fallbackChoice = node.choices[fallbackIdx];
-    if (fallbackChoice) selectChoice(fallbackChoice);
-  }
-}, 1000);
 }
 async function renderNode(nodeId, isRewind = false) {
 const mainScroller = document.querySelector('main');
@@ -2176,7 +2121,6 @@ btn.classList.add('done');
 btn.textContent = '✓ Осмотрено: ' + insp.label;
 
 appendInspectToStory(insp.label, insp.text, insp.id);
-pauseDeadlineForReading(15);
 
 if (insp.clue && !state.clues.some(c => c.id === insp.clue.id)) {
 state.clues.push(insp.clue);
@@ -2471,7 +2415,6 @@ rewindList.appendChild(card);
   initArchetypesUI();
   renderResources();
   syncReadingModeButtons();
-  syncTimerButton();
   // Узел сюжета отрисовывается по кнопке «ПРОДОЛЖИТЬ» на обложке,
   // чтобы таймер дедлайна не шёл за закрытой обложкой.
 })();
