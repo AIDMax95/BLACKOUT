@@ -1735,6 +1735,8 @@ let activeParagraphs = [];
 let activeParagraphIndex = 0;
 let currentRenderedNode = null;
 let loadedChapterFiles = {};
+// Не допускаем параллельную повторную загрузку одного и того же модуля.
+const chapterLoadPromises = new Map();
 // API для подключения внешних модулей глав (chapters/ch01.js и т.д.)
 window.registerChapter = function(chapterId, nodesObj, callsArr = []) {
 Object.assign(window.STORY_NODES, nodesObj);
@@ -1761,20 +1763,51 @@ return Object.keys(CHAPTER_FILES)
   .find(key => nodeId === key || nodeId.startsWith(key + '_')) || null;
 }
 function loadChapterScript(chapterKey) {
-return new Promise((resolve) => {
 const src = CHAPTER_FILES[chapterKey];
-if (!src || loadedChapterFiles[chapterKey]) return resolve(true);
-const script = document.createElement('script');
-script.src = src;
-script.onload = () => { loadedChapterFiles[chapterKey] = true; resolve(true); };
-script.onerror = () => {
-  console.warn('Не удалось загрузить модуль главы:', src);
-  script.remove();
-  resolve(false);
-};
-document.head.appendChild(script);
+if (!src) return Promise.resolve(false);
+if (loadedChapterFiles[chapterKey]) return Promise.resolve(true);
+if (chapterLoadPromises.has(chapterKey)) return chapterLoadPromises.get(chapterKey);
+
+const promise = new Promise((resolve) => {
+  const script = document.createElement('script');
+  script.src = src;
+  script.async = true;
+  script.dataset.chapterKey = chapterKey;
+  script.onload = () => {
+    loadedChapterFiles[chapterKey] = true;
+    resolve(true);
+  };
+  script.onerror = () => {
+    console.warn('Не удалось загрузить модуль главы:', src);
+    script.remove();
+    resolve(false);
+  };
+  document.head.appendChild(script);
+}).finally(() => {
+  chapterLoadPromises.delete(chapterKey);
 });
+
+chapterLoadPromises.set(chapterKey, promise);
+return promise;
 }
+
+/**
+ * Гарантирует подключение модуля, которому принадлежит запрошенный сюжетный узел.
+ * В отличие от простого split('_')[0], resolveChapterKey сохраняет составные
+ * имена модулей финалов: end_01, end_02, end_03 и end_04.
+ */
+async function ensureChapterLoaded(nodeId) {
+  const id = String(nodeId || '');
+  if (!id) return false;
+  if (Object.prototype.hasOwnProperty.call(window.STORY_NODES, id)) return true;
+
+  const chapterKey = resolveChapterKey(id);
+  if (!chapterKey) return false;
+
+  const loaded = await loadChapterScript(chapterKey);
+  return loaded && Object.prototype.hasOwnProperty.call(window.STORY_NODES, id);
+}
+window.ensureChapterLoaded = ensureChapterLoaded;
 /**
 • ============================================================================
 • ИНИЦИАЛИЗАЦИЯ И СОХРАНЕНИЕ
@@ -2050,10 +2083,11 @@ const preserveScrollPosition = previousNodeId === nodeId;
 clearReadingTimers();
 clearDeadline();
 const token = ++renderVersion;
-// Автоподгрузка по самому длинному совпадающему ключу: работает и с end_01/end_02.
+// Единая автоподгрузка модуля для любого сюжетного узла.
+// Ключ выбирается по самому длинному совпадению, включая end_01/end_02.
 const chapterKey = resolveChapterKey(nodeId);
-if (chapterKey && !loadedChapterFiles[chapterKey]) {
-await loadChapterScript(chapterKey);
+if (!Object.prototype.hasOwnProperty.call(window.STORY_NODES, nodeId)) {
+  await ensureChapterLoaded(nodeId);
 }
 if (token !== renderVersion) return;
 const node = window.STORY_NODES[nodeId];
