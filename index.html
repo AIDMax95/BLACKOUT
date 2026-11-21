@@ -1498,9 +1498,10 @@
           <div class="brand-sub" id="timeline-indicator">ЛИНИЯ #1 // НЕОБРАТИМО</div>
         </div>
       </div>
-      <div class="mode-switch" role="group" aria-label="Режим чтения">
+      <div class="mode-switch" role="group" aria-label="Режим чтения и таймера">
         <button class="mode-btn active" id="mode-realistic" type="button" aria-pressed="true">Реалистичный</button>
         <button class="mode-btn" id="mode-fast" type="button" aria-pressed="false">Быстрый</button>
+        <button class="mode-btn active" id="mode-timer" type="button" aria-pressed="true">Таймер: 60с+</button>
       </div>
     </div>
     <div class="resources" id="resources-bar"></div>
@@ -1729,6 +1730,7 @@ window.CHAPTER_CALLS = [];
 let state = {
 started: false,
 readingMode: 'realistic',
+timersEnabled: true,
 readNodeIds: [],
 archetypeId: 'analyst',
 timelineIndex: 1,
@@ -1749,6 +1751,7 @@ unlockedCalls: [],
 flags: {}
 };
 let deadlineInterval = null;
+let timerPauseUntil = 0;
 let typingTimer = null;
 let dockRevealTimer = null;
 let renderVersion = 0;
@@ -1815,6 +1818,8 @@ const raw = localStorage.getItem(SAVE_KEY);
 if (!raw) return false;
 state = Object.assign(state, JSON.parse(raw));
 if (!['realistic', 'fast'].includes(state.readingMode)) state.readingMode = 'realistic';
+// В старых сохранениях этого параметра нет — по умолчанию таймеры включены.
+if (typeof state.timersEnabled !== 'boolean') state.timersEnabled = true;
 if (!Array.isArray(state.readNodeIds)) state.readNodeIds = [];
 if (!state.inspectedDone || typeof state.inspectedDone !== 'object') state.inspectedDone = {};
 if (!state.inspectionCharsCounted || typeof state.inspectionCharsCounted !== 'object') state.inspectionCharsCounted = {};
@@ -1854,8 +1859,29 @@ state.readingMode = mode === 'fast' ? 'fast' : 'realistic';
  saveState();
  if (state.readingMode === 'fast' && activeNodeForReading) finishReadingImmediately();
 }
+function syncTimerButton() {
+const button = document.getElementById('mode-timer');
+if (!button) return;
+button.classList.toggle('active', !!state.timersEnabled);
+button.textContent = state.timersEnabled ? 'Таймер: 60с+' : 'Без таймера';
+button.setAttribute('aria-pressed', String(!!state.timersEnabled));
+}
 document.getElementById('mode-realistic').addEventListener('click', () => setReadingMode('realistic'));
 document.getElementById('mode-fast').addEventListener('click', () => setReadingMode('fast'));
+document.getElementById('mode-timer').addEventListener('click', () => {
+state.timersEnabled = !state.timersEnabled;
+syncTimerButton();
+if (!state.timersEnabled) {
+  clearDeadline();
+} else {
+  const dock = document.getElementById('action-dock');
+  const dockIsVisible = dock && !dock.classList.contains('hidden-dock');
+  if (currentRenderedNode && !activeNodeForReading && dockIsVisible) {
+    startNodeDeadline(currentRenderedNode, renderVersion);
+  }
+}
+saveState();
+});
 document.getElementById('skip-typing-btn').addEventListener('click', finishReadingImmediately);
 document.getElementById('btn-start-game').onclick = () => {
 clearReadingTimers();
@@ -1923,6 +1949,7 @@ if (deadlineInterval) {
 clearInterval(deadlineInterval);
 deadlineInterval = null;
 }
+timerPauseUntil = 0;
 const deadlineBox = document.getElementById('deadline-container');
 if (deadlineBox) deadlineBox.style.display = 'none';
 }
@@ -2033,24 +2060,41 @@ activeParagraphIndex++;
 }
 revealActionDock(renderVersion);
 }
+function pauseDeadlineForReading(extraSec = 15) {
+timerPauseUntil = Date.now() + Math.max(0, Number(extraSec) || 0) * 1000;
+}
 function startNodeDeadline(node, token) {
-if (!node || !node.deadline || !node.choices || !node.choices.length || token !== renderVersion) return;
-let left = Number(node.deadline) || 0;
-if (left <= 0) return;
+// Не начинаем отсчёт, пока сцена не прочитана и нижняя панель не открыта.
+if (!state.timersEnabled || !node || !node.deadline || !node.choices || !node.choices.length || token !== renderVersion) {
+  clearDeadline();
+  return;
+}
+// При повторном запуске не допускаем двух параллельных интервалов.
+clearDeadline();
+// Дополнительные 40 секунд и нижний предел в 60 секунд на чтение выбора.
+let left = Math.max(60, (Number(node.deadline) || 20) + 40);
 const dBox = document.getElementById('deadline-container');
 const dSec = document.getElementById('deadline-seconds');
+if (!dBox || !dSec) return;
 dBox.style.display = 'flex';
 dSec.textContent = left + 's';
 deadlineInterval = setInterval(() => {
-if (token !== renderVersion) { clearDeadline(); return; }
-left--;
-dSec.textContent = left + 's';
-if (left <= 0) {
-clearDeadline();
-const fallbackIdx = node.timeoutChoiceIndex ?? (node.choices.length - 1);
-const fallbackChoice = node.choices[fallbackIdx];
-if (fallbackChoice) selectChoice(fallbackChoice);
-}
+  if (token !== renderVersion) { clearDeadline(); return; }
+
+  // Осмотр добавляет 15 секунд спокойного чтения, не уменьшая остаток таймера.
+  if (Date.now() < timerPauseUntil) {
+    dSec.textContent = left + 's (пауза)';
+    return;
+  }
+
+  left--;
+  dSec.textContent = left + 's';
+  if (left <= 0) {
+    clearDeadline();
+    const fallbackIdx = node.timeoutChoiceIndex ?? (node.choices.length - 1);
+    const fallbackChoice = node.choices[fallbackIdx];
+    if (fallbackChoice) selectChoice(fallbackChoice);
+  }
 }, 1000);
 }
 async function renderNode(nodeId, isRewind = false) {
@@ -2132,6 +2176,7 @@ btn.classList.add('done');
 btn.textContent = '✓ Осмотрено: ' + insp.label;
 
 appendInspectToStory(insp.label, insp.text, insp.id);
+pauseDeadlineForReading(15);
 
 if (insp.clue && !state.clues.some(c => c.id === insp.clue.id)) {
 state.clues.push(insp.clue);
@@ -2426,6 +2471,7 @@ rewindList.appendChild(card);
   initArchetypesUI();
   renderResources();
   syncReadingModeButtons();
+  syncTimerButton();
   // Узел сюжета отрисовывается по кнопке «ПРОДОЛЖИТЬ» на обложке,
   // чтобы таймер дедлайна не шёл за закрытой обложкой.
 })();
