@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>СЛЕПОЕ ПЯТНО — Интерактивный психологический триллер</title>
+  <title>BLACKOUT — Интерактивный психологический хоррор-триллер</title>
+  <meta name="description" content="BLACKOUT — интерактивный психологический хоррор-триллер. Затмение в городе. Провал в памяти. История Аэ́рхиса Вейра." />
   <style>
     :root {
       --bg-outer: #0b0c0e;
@@ -156,6 +157,18 @@
       color: var(--ink-dim);
       margin-bottom: 18px;
     }
+
+
+    .hero-identity {
+      display: flex; flex-direction: column; gap: 4px;
+      margin: 0 0 16px; padding: 12px 14px;
+      border: 1px solid rgba(214,165,84,.30); border-left: 3px solid #d64550;
+      border-radius: 5px;
+      background: linear-gradient(110deg, rgba(85,20,31,.27), rgba(8,12,18,.72));
+    }
+    .hero-identity-kicker { color: #dca354; font: 700 9px/1.4 ui-monospace,monospace; letter-spacing: .17em; }
+    .hero-identity-name { color: #f1f4fa; font: 800 20px/1.2 ui-monospace,monospace; letter-spacing: .06em; }
+    .hero-identity-role { color: #9aa8bb; font-size: 11px; letter-spacing: .04em; }
 
     code { font-family: var(--font-mono); font-size: 0.9em; }
 
@@ -650,7 +663,7 @@
     .cover-poster {
       position: relative;
       height: min(94vh, 880px);
-      aspect-ratio: 2 / 3;
+      aspect-ratio: 56 / 75;
       max-width: 96vw;
       border-radius: 10px;
       overflow: hidden;
@@ -747,10 +760,21 @@
     }
 
     .cover-kicker {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 7px 12px 6px;
+      border: 1px solid rgba(164, 159, 164, 0.34);
+      border-left: 2px solid rgba(224, 41, 61, 0.95);
+      border-right: 2px solid rgba(224, 41, 61, 0.58);
+      border-radius: 2px;
+      background: linear-gradient(105deg, rgba(116, 25, 36, 0.28), rgba(112, 117, 126, 0.13) 72%, rgba(28, 31, 38, 0.12));
+      box-shadow: 0 0 22px rgba(224, 41, 61, 0.12), inset 0 0 16px rgba(148, 163, 184, 0.06);
       font-family: var(--font-mono);
-      font-size: 10.5px;
-      letter-spacing: 0.3em;
-      color: #aeb8cc;
+      font-size: 10px;
+      letter-spacing: 0.24em;
+      color: #d6cdd0;
+      text-shadow: 0 0 12px rgba(224, 41, 61, 0.22);
       text-transform: uppercase;
       margin-bottom: 12px;
     }
@@ -1462,8 +1486,8 @@
     <div class="loader-cam" aria-hidden="true">CAM 07 // КОРИДОР Б</div>
     <div class="loader-center">
       <div class="loader-lens" aria-hidden="true"><div class="loader-pupil"></div></div>
-      <div class="loader-title">СЛЕПОЕ ПЯТНО</div>
-      <div class="loader-sub">Контур наблюдения</div>
+      <div class="loader-title">BLACKOUT</div>
+      <div class="loader-sub">Затмение в городе. Провал в памяти.</div>
       <div class="loader-log" id="loader-log"></div>
       <div class="loader-track" aria-hidden="true"><div class="loader-progress" id="loader-progress-bar"></div></div>
       <div class="loader-meta"><span id="loader-status-text">Инициализация...</span><span id="loader-percent-text">0%</span></div>
@@ -1480,10 +1504,10 @@
       <div class="cover-shade" aria-hidden="true"></div>
       <div class="cover-frame" aria-hidden="true"></div>
       <div class="cover-content">
-        <div class="cover-kicker">Интерактивный психологический триллер</div>
+        <div class="cover-kicker">Интерактивный психологический хоррор-триллер</div>
         <div class="cover-rule" aria-hidden="true"><span></span><b>◆</b><span></span></div>
-        <h1 class="cover-title"><span data-text="СЛЕПОЕ">СЛЕПОЕ</span><span class="accent" data-text="ПЯТНО">ПЯТНО</span></h1>
-        <div class="cover-subtitle">Авторская книга-игра<br><em>Пролог · 8 глав · 4 эпилога</em></div>
+        <h1 class="cover-title"><span class="accent" data-text="BLACKOUT">BLACKOUT</span></h1>
+        <div class="cover-subtitle">Затмение в городе. Провал в памяти.<br><em>История Аэ́рхиса Вейра</em></div>
         <button class="cover-btn cover-btn-primary" id="cover-new-btn" type="button">Начать игру</button>
         <button class="cover-btn cover-btn-secondary" id="cover-continue-btn" type="button" style="display:none;">Продолжить</button>
         <div class="cover-foot">Первое прохождение необратимо</div>
@@ -1495,7 +1519,7 @@
     <div class="header-top">
       <div class="brand">
         <div>
-          <div class="brand-title">СЛЕПОЕ ПЯТНО</div>
+          <div class="brand-title">BLACKOUT</div>
           <div class="brand-sub" id="timeline-indicator">ЛИНИЯ #1 // НЕОБРАТИМО</div>
         </div>
       </div>
@@ -1519,13 +1543,18 @@
   <main>
     <section id="screen-start" class="screen active">
       <div class="hero-box">
-        <h1>СЛЕПОЕ ПЯТНО</h1>
+        <h1>BLACKOUT</h1>
+        <div class="hero-identity" aria-label="Стартовое досье главного героя">
+          <span class="hero-identity-kicker">СТАРТОВОЕ ДОСЬЕ // НОСИТЕЛЬ 04-А</span>
+          <strong class="hero-identity-name">Аэ́рхис Вейр</strong>
+          <span class="hero-identity-role">Главный Архитектор контура наблюдения</span>
+        </div>
         <p class="hero-desc">
           За обычными разговорами скрывается тревожная история о слежке, подмене памяти и закрытом контуре наблюдения.
           Первое прохождение необратимо. После финала откроется Хронология Т2 — возможность вернуться в любую точку,
-          переписать выбор Аэ́рхиса и увидеть, к чему приведёт новая версия событий.
+          переписать выбор Аэ́рхиса Вейра и увидеть, к чему приведёт новая версия событий.
         </p>
-        <h2>Выберите психологический профиль Аэ́рхиса:</h2>
+        <h2>Выберите психологический профиль Аэ́рхиса Вейра:</h2>
         <div id="archetype-list" class="archetype-grid"></div>
         <button id="btn-start-game" class="primary-btn" type="button">НАЧАТЬ ПЕРВУЮ ЛИНИЮ</button>
       </div>
@@ -1555,7 +1584,7 @@
     </section>
 
     <section id="screen-skills" class="screen">
-      <div class="hero-box"><h1>ПСИХОМЕТРИЧЕСКИЙ ПРОФИЛЬ</h1><p class="hero-desc">Десять навыков Аэ́рхиса и их текущие уровни.</p></div>
+      <div class="hero-box"><h1>ПСИХОМЕТРИЧЕСКИЙ ПРОФИЛЬ</h1><p class="hero-desc">Десять навыков Аэ́рхиса Вейра и их текущие уровни.</p></div>
       <div id="skills-grid" class="grid-2"></div>
     </section>
     <section id="screen-clues" class="screen">
@@ -1564,6 +1593,11 @@
     </section>
     <section id="screen-dossier" class="screen">
       <div class="hero-box"><h1>ДОСЬЕ</h1><p class="hero-desc">Субъекты наблюдения и окружение.</p></div>
+      <div class="card hero-identity" aria-label="Личное дело главного героя">
+        <span class="hero-identity-kicker">НОСИТЕЛЬ // 04-А</span>
+        <strong class="hero-identity-name">Аэ́рхис Вейр</strong>
+        <span class="hero-identity-role">Главный Архитектор контура · Статус: активен</span>
+      </div>
       <div id="dossier-grid" class="grid-2"></div>
     </section>
     <section id="screen-calls" class="screen">
@@ -1593,7 +1627,7 @@
 
 /**
 • ============================================================================
-• КОНФИГУРАЦИЯ ИГРЫ «СЛЕПОЕ ПЯТНО»
+• КОНФИГУРАЦИЯ ИГРЫ «BLACKOUT»
 • ============================================================================
 */
 const SAVE_KEY = 'blind_spot_aerhis_v1';
@@ -1629,7 +1663,7 @@ items: ['dictaphone', 'cipher_note']
 {
 id: 'mimic',
 name: 'Двойник',
-bio: 'Умеет быть именно тем Аэ́рхисом, которого хотят видеть камеры и люди вокруг.',
+bio: 'Умеет быть именно тем Аэ́рхисом Вейром, которого хотят видеть камеры и люди вокруг.',
 bonusText: '+2 Мимикрия, +2 Самообладание, +15 Доверие',
 stats: { hp: 90, o2: 95, energy: 90, ammo: 2 },
 skills: { paranoia: 1, empathy: 2, cold_calc: 1, mimicry: 3, details: 1, composure: 3, provocation: 1, intuition: 2, subtext: 2, resilience: 2 },
@@ -1684,16 +1718,16 @@ items: ['sedative', 'master_key']
 const ITEMS_DB = {
 dictaphone:  { name: 'Микродиктофон', desc: 'Записывает противоречия в диалогах. Использование: +2 Компромата.', use: (s) => { changeStat('ammo', 2); return 'Запись сохранена в защищённый буфер (+2 Компромата).'; } },
 sedative:    { name: 'Блокатор тревоги', desc: 'Снижает панику после контакта с Т2. Использование: +15 Рассудка.', use: (s) => { changeStat('hp', 15); return 'Пульс выровнялся, шум в ушах отступил (+15 Рассудка).'; } },
-cipher_note: { name: 'Блокнот с пометками', desc: 'Личные записи Аэ́рхиса о провалах в памяти. Использование: +15 Выдержки.', use: (s) => { changeStat('energy', 15); return 'Сверив даты, вы вернули ясность мысли (+15 Выдержки).'; } },
+cipher_note: { name: 'Блокнот с пометками', desc: 'Личные записи Аэ́рхиса Вейра о провалах в памяти. Использование: +15 Выдержки.', use: (s) => { changeStat('energy', 15); return 'Сверив даты, вы вернули ясность мысли (+15 Выдержки).'; } },
 spare_badge: { name: 'Дубликат пропуска', desc: 'Открывает закрытые сектора и проверки Мимикрии.' },
 old_photo:   { name: 'Выцветший снимок', desc: 'Фотография без даты. Помогает в разговорах с Мирой и Верой.' },
 burner_sim:  { name: 'Резервный модуль связи', desc: 'Позволяет принять скрытый вызов без фиксации в основном журнале.' },
 master_key:  { name: 'Отмычка сервисных люков', desc: 'Даёт доступ к техническим помещениям контура.' }
 };
 const INITIAL_DOSSIER = {
-mira:  { name: 'Мира Соколова', role: 'Соседка / Координатор сектора', trust: 50, status: 'Активна', note: 'Слишком точно знает расписание Аэ́рхиса. Улыбается на полсекунды позже, чем нужно.' },
+mira:  { name: 'Мира Соколова', role: 'Соседка / Координатор сектора', trust: 50, status: 'Активна', note: 'Слишком точно знает расписание Аэ́рхиса Вейра. Улыбается на полсекунды позже, чем нужно.' },
 ilya:  { name: 'Илья Кравцов', role: 'Коллега по архиву', trust: 45, status: 'Активен', note: 'Постоянно оглядывается на индикаторы над дверью. Боится говорить вслух.' },
-vera:  { name: 'Вера Орлова', role: 'Психолог-куратор', trust: 40, status: 'Активна', note: 'Ведёт протокол стабильности. Утверждает, что половина воспоминаний Аэ́рхиса — реконструкция.' },
+vera:  { name: 'Вера Орлова', role: 'Психолог-куратор', trust: 40, status: 'Активна', note: 'Ведёт протокол стабильности. Утверждает, что половина воспоминаний Аэ́рхиса Вейра — реконструкция.' },
 voss:  { name: 'Артур Восс', role: 'Руководитель внешнего контура', trust: 20, status: 'Неизвестно', note: 'Имя встречается в удалённых отчётах. Лично в кадре не появляется.' }
 };
 // Редакция 2: новый Пролог; старые незавершённые сохранения мигрируют к prologue_start.
@@ -2199,7 +2233,7 @@ function createStoryParagraph(block, index, allBlocks) {
     p.className = 'speech-hero smooth-reveal';
     const tag = document.createElement('span');
     tag.className = 'speaker-tag';
-    tag.textContent = 'Аэ́рхис';
+    tag.textContent = 'Аэ́рхис Вейр';
     p.appendChild(tag);
     p.appendChild(document.createTextNode(block.text || ''));
   } else if (block && block.type === 'npc') {
@@ -2630,7 +2664,7 @@ grid.appendChild(card);
 function renderChronologyTab() {
 const speech = document.getElementById('t2-chronology-speech');
 if (state.t2Affinity > 0) {
-speech.textContent = `Ты действуешь осторожно, Аэ́рхис (Отношение Т2: +${state.t2Affinity}). Выбери точку возврата — я сохраню прежнюю линию в архиве.`;
+speech.textContent = `Ты действуешь осторожно, Аэ́рхис Вейр (Отношение Т2: +${state.t2Affinity}). Выбери точку возврата — я сохраню прежнюю линию в архиве.`;
 } else if (state.t2Affinity < 0) {
 speech.textContent = `Ты провоцируешь систему и ломаешь сценарий (Отношение Т2: ${state.t2Affinity}). Посмотрим, станет ли следующая версия лучше.`;
 } else {
@@ -2720,7 +2754,7 @@ rewindList.appendChild(card);
 
   const steps = [
     { at: 0.04, text: 'Калибровка оптического датчика', short: 'Оптика' },
-    { at: 0.26, text: 'Сверка архива памяти: Аэ́рхис', short: 'Память' },
+    { at: 0.26, text: 'Сверка архива памяти: Аэ́рхис Вейр', short: 'Память' },
     { at: 0.48, text: 'Чтение журнала интеркома', short: 'Интерком' },
     { at: 0.70, text: 'Установка закрытого канала Т2', short: 'Канал Т2' },
     { at: 0.90, text: 'Доступ к первой линии открыт', short: 'Готово' }
