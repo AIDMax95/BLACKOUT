@@ -1227,6 +1227,28 @@
     }
     .speaker-tag { display:block; margin-bottom:4px; color:var(--amber); font:700 9px ui-monospace,monospace; letter-spacing:.1em; text-transform:uppercase; }
     .speech-npc .speaker-tag { color:#8fa2bf; }
+
+    /* Индивидуальные цветовые профили NPC */
+    .story-text .speech-npc.sp-t2 { border-left-color:#2dd4bf; background:rgba(45,212,191,.08); }
+    .story-text .speech-npc.sp-t2 .speaker-tag { color:#2dd4bf; }
+
+    .story-text .speech-npc.sp-ilya { border-left-color:#fbbf24; background:rgba(251,191,36,.08); }
+    .story-text .speech-npc.sp-ilya .speaker-tag { color:#fbbf24; }
+
+    .story-text .speech-npc.sp-vera { border-left-color:#c084fc; background:rgba(192,132,252,.08); }
+    .story-text .speech-npc.sp-vera .speaker-tag { color:#c084fc; }
+
+    .story-text .speech-npc.sp-mira { border-left-color:#4ade80; background:rgba(74,222,128,.08); }
+    .story-text .speech-npc.sp-mira .speaker-tag { color:#4ade80; }
+
+    .story-text .speech-npc.sp-voss { border-left-color:#f87171; background:rgba(248,113,113,.09); }
+    .story-text .speech-npc.sp-voss .speaker-tag { color:#f87171; }
+
+    .story-text .speech-npc.sp-victor { border-left-color:#fb923c; background:rgba(251,146,60,.08); }
+    .story-text .speech-npc.sp-victor .speaker-tag { color:#fb923c; }
+
+    .story-text .speech-npc.sp-other { border-left-color:#94a3b8; background:rgba(148,163,184,.07); }
+    .story-text .speech-npc.sp-other .speaker-tag { color:#94a3b8; }
     .smooth-reveal { animation:paragraphReveal .42s ease both; }
     @keyframes paragraphReveal { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:none; } }
     .skip-typing-bar { display:flex; justify-content:flex-end; margin-top:8px; }
@@ -1964,31 +1986,236 @@ deadlineInterval = null;
 const deadlineBox = document.getElementById('deadline-container');
 if (deadlineBox) deadlineBox.style.display = 'none';
 }
-function createStoryParagraph(block) {
-const p = document.createElement('p');
-p.classList.add('smooth-reveal');
-if (typeof block === 'string') {
-p.textContent = block;
-} else if (block && block.type === 'hero') {
-p.className = 'speech-hero smooth-reveal';
-const tag = document.createElement('span');
-tag.className = 'speaker-tag';
-tag.textContent = 'Аэ́рхис';
-p.appendChild(tag);
-p.appendChild(document.createTextNode(block.text || ''));
-} else if (block && block.type === 'npc') {
-p.className = 'speech-npc smooth-reveal';
-const tag = document.createElement('span');
-tag.className = 'speaker-tag';
-tag.textContent = 'Собеседник // Эфир';
-p.appendChild(tag);
-p.appendChild(document.createTextNode(block.text || ''));
-} else if (block && typeof block.text === 'string') {
-p.textContent = block.text;
-} else {
-p.textContent = String(block ?? '');
+const NPC_SPEAKERS = [
+  {
+    name: 'Т2 // Внутренний канал', key: 't2',
+    aliases: ['Т2', 'T2'], subjectRx: /(?:^|[^\p{L}\p{N}])(?:Т2|T2)(?=$|[^\p{L}\p{N}])/iu,
+    rx: /(?:^|[^\p{L}\p{N}])(?:Т2|T2)(?=$|[^\p{L}\p{N}])/iu
+  },
+  {
+    name: 'Илья Кравцов', key: 'ilya',
+    aliases: ['Илья', 'Кравцов'], subjectRx: /(?:^|[^\p{L}\p{N}])Илья(?:\s+Кравцов)?(?=$|[^\p{L}\p{N}])/iu,
+    rx: /(?:^|[^\p{L}\p{N}])(?:Илья|Ильи|Илье|Илью|Ильёй|Кравцов[а-яё]*)(?=$|[^\p{L}\p{N}])/iu
+  },
+  {
+    name: 'Вера Орлова', key: 'vera',
+    aliases: ['Вера', 'Орлова'], subjectRx: /(?:^|[^\p{L}\p{N}])Вера(?:\s+Орлова)?(?=$|[^\p{L}\p{N}])/iu,
+    rx: /(?:^|[^\p{L}\p{N}])(?:Вера|Веры|Вере|Веру|Верой|Орлова|Орловой|Орлову|Орлове)(?=$|[^\p{L}\p{N}])/iu
+  },
+  {
+    name: 'Мира Соколова', key: 'mira',
+    aliases: ['Мира', 'Соколова'], subjectRx: /(?:^|[^\p{L}\p{N}])Мира(?:\s+Соколова)?(?=$|[^\p{L}\p{N}])/iu,
+    rx: /(?:^|[^\p{L}\p{N}])(?:Мира|Миры|Мире|Миру|Мирой|Соколова|Соколовой|Соколову|Соколове)(?=$|[^\p{L}\p{N}])/iu
+  },
+  {
+    name: 'Артур Восс', key: 'voss',
+    aliases: ['Артур', 'Восс'], subjectRx: /(?:^|[^\p{L}\p{N}])Артур\s+Восс(?=$|[^\p{L}\p{N}])/iu,
+    rx: /(?:^|[^\p{L}\p{N}])(?:Артур[а-яё]*|Восс[а-яё]*)(?=$|[^\p{L}\p{N}])/iu
+  },
+  {
+    name: 'Виктор // Восток-01', key: 'victor',
+    aliases: ['Виктор', 'Восток-01'], subjectRx: /(?:^|[^\p{L}\p{N}])Виктор(?=$|[^\p{L}\p{N}])/iu,
+    rx: /(?:^|[^\p{L}\p{N}])(?:Виктор[а-яё]*|Восток-01)(?=$|[^\p{L}\p{N}])/iu
+  },
+  {
+    name: 'Капитан Громов', key: 'other',
+    aliases: ['Громов'], subjectRx: /(?:^|[^\p{L}\p{N}])Громов(?=$|[^\p{L}\p{N}])/iu,
+    rx: /(?:^|[^\p{L}\p{N}])Громов[а-яё]*(?=$|[^\p{L}\p{N}])/iu
+  },
+  {
+    name: 'Коршун // Корунд-1', key: 'other',
+    aliases: ['Коршун', 'Корунд-1'], subjectRx: /(?:^|[^\p{L}\p{N}])Коршун(?=$|[^\p{L}\p{N}])/iu,
+    rx: /(?:^|[^\p{L}\p{N}])(?:Коршун[а-яё]*|Корунд-1)(?=$|[^\p{L}\p{N}])/iu
+  },
+  {
+    name: 'Сержант Морозов', key: 'other',
+    aliases: ['Морозов'], subjectRx: /(?:^|[^\p{L}\p{N}])Морозов(?=$|[^\p{L}\p{N}])/iu,
+    rx: /(?:^|[^\p{L}\p{N}])Морозов[а-яё]*(?=$|[^\p{L}\p{N}])/iu
+  },
+  {
+    name: 'Сержант Ковалёв', key: 'other',
+    aliases: ['Ковалёв', 'Ковалев'], subjectRx: /(?:^|[^\p{L}\p{N}])Ковал[её]в(?=$|[^\p{L}\p{N}])/iu,
+    rx: /(?:^|[^\p{L}\p{N}])Ковал[её]в[а-яё]*(?=$|[^\p{L}\p{N}])/iu
+  }
+];
+
+function getStoryBlockText(block) {
+  if (typeof block === 'string') return block;
+  if (block && typeof block.text === 'string') return block.text;
+  return '';
 }
-return p;
+
+function hasNearbySpeechCue(text, matchIndex, matchLength) {
+  const cues = /(?:голос|голосом|крик|криком|шёпот|шепот|произнёс|произнесла|произнес|обронил|обронила|сказал|сказала|сказали|говорит|говорил|говорила|ответил|ответила|отозвался|отозвалась|добавил|добавила|подтвердил|подтвердила|прошептал|прошептала|выдохнул|выдохнула|вздохнул|вздохнула|вздохом|вмешался|вмешалась|заговорил|заговорила|крикнул|крикнула|доложил|доложила|передал|передала|напомнил|напомнила|подсказал|подсказала|посоветовал|посоветовала|предупредил|предупредила|объяснил|объяснила)/iu;
+  const from = Math.max(0, matchIndex - 160);
+  const to = Math.min(text.length, matchIndex + matchLength + 160);
+  return cues.test(text.slice(from, to));
+}
+
+function hasTightSpeechCue(text, matchIndex, matchLength) {
+  const cues = /(?:произнёс|произнесла|сказал|сказала|ответил|ответила|отозвался|отозвалась|добавил|добавила|подтвердил|подтвердила|прошептал|прошептала|выдохнул|выдохнула|вздохнул|вздохнула|обронил|обронила|заговорил|заговорила|крикнул|крикнула|доложил|доложила|передал|передала|напомнил|напомнила|подсказал|подсказала|посоветовал|посоветовала|предупредил|предупредила|голос|крик)/iu;
+  const from = Math.max(0, matchIndex - 48);
+  const to = Math.min(text.length, matchIndex + matchLength + 34);
+  return cues.test(text.slice(from, to));
+}
+
+function hasVoiceLabel(text, speaker) {
+  if (!text) return false;
+  const voiceCue = /(?:голос|крик|шёпот|шепот|выдох|смех|реплика|сообщение|доклад)[а-яё\s-]{0,32}/iu;
+  const matches = text.matchAll(new RegExp(speaker.rx.source, 'giu'));
+  for (const match of matches) {
+    if (match.index == null) continue;
+    const before = text.slice(Math.max(0, match.index - 55), match.index);
+    if (voiceCue.test(before)) return true;
+  }
+  return false;
+}
+
+function detectNpcSpeaker(block, index, allBlocks, depth = 0) {
+  if (block && block.speaker) {
+    const explicit = String(block.speaker).trim().toLowerCase();
+    const found = NPC_SPEAKERS.find(sp =>
+      sp.key === explicit || sp.name.toLowerCase() === explicit ||
+      sp.aliases.some(alias => alias.toLowerCase() === explicit)
+    );
+    if (found) return found;
+    return { name: String(block.speaker), key: 'other' };
+  }
+
+  const blocks = Array.isArray(allBlocks) ? allBlocks : [];
+  const prevBlock = index > 0 ? blocks[index - 1] : null;
+  const nextBlock = index + 1 < blocks.length ? blocks[index + 1] : null;
+  const prevText = getStoryBlockText(prevBlock);
+  const nextText = getStoryBlockText(nextBlock);
+  const selfText = getStoryBlockText(block);
+  const prevContext = prevText.slice(-520);
+  const nextContext = nextText.slice(0, 420);
+  const firstQuoteEnd = selfText.indexOf('»');
+  const nextQuoteStart = firstQuoteEnd >= 0 ? selfText.indexOf('«', firstQuoteEnd + 1) : -1;
+  const attributionTail = firstQuoteEnd >= 0
+    ? selfText.slice(firstQuoteEnd + 1, nextQuoteStart >= 0 ? nextQuoteStart : selfText.length)
+    : '';
+
+  // Если сразу после первой прямой реплики стоит авторская атрибуция,
+  // она надёжнее любых соседних упоминаний других персонажей.
+  if (attributionTail) {
+    for (const speaker of NPC_SPEAKERS) {
+      const attributionMatch = attributionTail.match(speaker.rx);
+      if (attributionMatch && attributionMatch.index != null &&
+          hasTightSpeechCue(attributionTail, attributionMatch.index, attributionMatch[0].length)) {
+        return speaker;
+      }
+    }
+  }
+
+  // Явное самопредставление внутри самой реплики.
+  for (const speaker of NPC_SPEAKERS) {
+    const selfIntro = new RegExp(
+      `(?:меня\\s+зовут|говорит(?:\\s+командир\\s+[^.!?]{0,55})?|я\\s+(?:капитаном|капитан|сержант|командир))[^.!?]{0,85}${speaker.rx.source}`,
+      'iu'
+    );
+    if (selfIntro.test(selfText)) return speaker;
+  }
+
+  let best = null;
+  let bestScore = 0;
+  for (const speaker of NPC_SPEAKERS) {
+    let score = 0;
+
+    // Именительный падеж рядом с авторской атрибуцией в соседнем абзаце.
+    for (const ctx of [
+      { text: prevContext, edge: 'end' },
+      { text: nextContext, edge: 'start' }
+    ]) {
+      if (speaker.subjectRx) {
+        const match = ctx.text.match(speaker.subjectRx);
+        if (match && match.index != null) {
+          const distance = ctx.edge === 'end'
+            ? ctx.text.length - (match.index + match[0].length)
+            : match.index;
+          if (hasNearbySpeechCue(ctx.text, match.index, match[0].length)) {
+            score += 11 + Math.max(0, 2 * (1 - distance / 220));
+          } else if (distance <= 250) {
+            score += (ctx.edge === 'end' ? 6 : 4) + Math.max(0, 1.5 * (1 - distance / 250));
+          }
+        }
+      }
+      if (hasVoiceLabel(ctx.text, speaker)) score += 12;
+    }
+
+    // Авторская атрибуция сразу после прямой речи: «...», — сказал Илья.
+    if (attributionTail) {
+      const match = attributionTail.match(speaker.rx);
+      if (match && match.index != null && hasTightSpeechCue(attributionTail, match.index, match[0].length)) {
+        score += 15;
+      }
+    }
+
+    // Герой иногда прямо обращается к собеседнику в конце своей реплики.
+    if (prevBlock && prevBlock.type === 'hero') {
+      const heroTail = getStoryBlockText(prevBlock).slice(-95);
+      const addressed = heroTail.match(speaker.rx);
+      if (addressed && addressed.index != null &&
+          addressed.index + addressed[0].length >= heroTail.length - 26) {
+        score += 7;
+      }
+    }
+
+    if (score > bestScore) {
+      best = speaker;
+      bestScore = score;
+    }
+  }
+
+  if (best && bestScore >= 5) return best;
+
+  // В непрерывном обмене репликами сохраняем последнего установленного
+  // собеседника через короткий ход героя, если промежуточный текст не называет другого.
+  if (depth < 4) {
+    for (let j = index - 1; j >= Math.max(0, index - 4); j--) {
+      const candidate = blocks[j];
+      if (candidate && candidate.type === 'npc') {
+        const inherited = detectNpcSpeaker(candidate, j, blocks, depth + 1);
+        if (inherited && inherited.name !== 'Собеседник // Эфир') {
+          const bridgeText = blocks.slice(j + 1, index).map(getStoryBlockText).join(' ');
+          const namesAnotherSpeaker = NPC_SPEAKERS.some(sp =>
+            sp !== inherited && sp.subjectRx && sp.subjectRx.test(bridgeText)
+          );
+          if (!namesAnotherSpeaker) return inherited;
+        }
+        break;
+      }
+    }
+  }
+
+  return { name: 'Собеседник // Эфир', key: 'other' };
+}
+function createStoryParagraph(block, index, allBlocks) {
+  const p = document.createElement('p');
+  p.classList.add('smooth-reveal');
+  if (typeof block === 'string') {
+    p.textContent = block;
+  } else if (block && block.type === 'hero') {
+    p.className = 'speech-hero smooth-reveal';
+    const tag = document.createElement('span');
+    tag.className = 'speaker-tag';
+    tag.textContent = 'Аэ́рхис';
+    p.appendChild(tag);
+    p.appendChild(document.createTextNode(block.text || ''));
+  } else if (block && block.type === 'npc') {
+    const sp = detectNpcSpeaker(block, index, allBlocks);
+    p.className = `speech-npc sp-${sp.key} smooth-reveal`;
+    const tag = document.createElement('span');
+    tag.className = 'speaker-tag';
+    tag.textContent = sp.name;
+    p.appendChild(tag);
+    p.appendChild(document.createTextNode(block.text || ''));
+  } else if (block && typeof block.text === 'string') {
+    p.textContent = block.text;
+  } else {
+    p.textContent = String(block ?? '');
+  }
+  return p;
 }
 function updatePageCounter() {
 const pagesEl = document.getElementById('pages-label');
