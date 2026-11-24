@@ -1475,6 +1475,23 @@
       .choice-left { width: 100%; }
       .choice-req.req-badge { margin-left: 35px; }
     }
+  
+
+    /* Фоновая музыка BLACKOUT */
+    #bgm-toggle-btn {
+      margin-left: auto;
+      border-color: #3a4a5e;
+      color: #d9e5f4;
+      min-width: max-content;
+    }
+    #bgm-toggle-btn[aria-pressed="false"] {
+      color: #a89984;
+      border-color: #352c23;
+    }
+    #bgm-toggle-btn:focus-visible {
+      outline: 2px solid #dca354;
+      outline-offset: 2px;
+    }
   </style>
 
 </head>
@@ -1538,6 +1555,7 @@
       <button class="tab-btn" id="tab-calls" data-tab="calls" type="button">Связь <span class="badge" id="calls-count">0</span></button>
       <button class="tab-btn" id="tab-inventory" data-tab="inventory" type="button">Предметы</button>
       <button class="tab-btn locked" id="tab-chronology" data-tab="chronology" type="button">Хронология Т2</button>
+      <button class="tab-btn audio-toggle-btn" id="bgm-toggle-btn" type="button" title="Фоновая музыка" aria-label="Переключить фоновую музыку" aria-pressed="true">🔊 Звук: ВКЛ</button>
     </nav>
   </header>
 
@@ -2365,6 +2383,9 @@ document.getElementById('skip-typing-bar').style.display = 'none';
 return;
 }
 state.currentNodeId = nodeId;
+if (window.BLACKOUT_MUSIC && typeof window.BLACKOUT_MUSIC.syncNode === 'function') {
+  window.BLACKOUT_MUSIC.syncNode(nodeId);
+}
 if (!isRewind) {
 const snapshot = {
 nodeId,
@@ -2844,5 +2865,225 @@ rewindList.appendChild(card);
 </script>
   <!-- Пролог загружается сразу; модули глав движок подгружает лениво из CHAPTER_FILES. -->
   <script src="chapters/prologue.js"></script>
+
+
+  <!-- Автоматический саундтрек BLACKOUT: переключение по ID текущего сюжетного узла. -->
+  <script>
+  (function initBlackoutMusic() {
+    'use strict';
+
+    const TRACKS = Object.freeze({
+      prologue: 'audio/menu_prologue.mp3',
+      ch1_3: 'audio/ch01_03.mp3',
+      ch4_6: 'audio/ch04_06.mp3',
+      ch7_8: 'audio/ch07_08.mp3'
+    });
+    const STORAGE_KEY = 'blackout_bgm_muted';
+    const MAX_VOLUME = 0.28;
+    const FADE_MS = 1100;
+    const FADE_STEP_MS = 35;
+
+    function readMutedPreference() {
+      try { return localStorage.getItem(STORAGE_KEY) === 'true'; }
+      catch (_) { return false; }
+    }
+    function storeMutedPreference(value) {
+      try { localStorage.setItem(STORAGE_KEY, String(value)); }
+      catch (error) { console.warn('BLACKOUT: не удалось сохранить настройку музыки.', error); }
+    }
+
+    const button = document.getElementById('bgm-toggle-btn');
+    const channels = [new Audio(), new Audio()];
+    const fadeIntervals = new WeakMap();
+    let muted = readMutedPreference();
+    let userGestureReceived = false;
+    let activeChannel = -1;
+    let activeKey = '';
+    let switchToken = 0;
+    let audioUnavailable = false;
+
+    channels.forEach((audio) => {
+      audio.loop = true;
+      audio.preload = 'none';
+      audio.volume = 0;
+      audio.setAttribute('playsinline', '');
+      audio.addEventListener('canplay', () => {
+        audioUnavailable = false;
+        updateButton();
+      });
+      audio.addEventListener('error', () => {
+        audioUnavailable = true;
+        updateButton();
+        console.warn('BLACKOUT: не удалось загрузить аудиофайл. Проверьте папку audio/ и имя MP3.');
+      });
+    });
+
+    function updateButton() {
+      if (!button) return;
+      if (audioUnavailable && !muted) {
+        button.textContent = '⚠ Нет аудиофайла';
+        button.title = 'Добавьте четыре MP3-файла в папку audio/';
+      } else {
+        button.textContent = muted ? '🔇 Звук: ВЫКЛ' : '🔊 Звук: ВКЛ';
+        button.title = muted ? 'Включить фоновую музыку' : 'Выключить фоновую музыку';
+      }
+      button.setAttribute('aria-pressed', String(!muted));
+    }
+
+    function fadeTo(audio, target, duration, onComplete) {
+      const oldInterval = fadeIntervals.get(audio);
+      if (oldInterval) clearInterval(oldInterval);
+
+      const startVolume = Number.isFinite(audio.volume) ? audio.volume : 0;
+      const startedAt = Date.now();
+      if (duration <= 0 || Math.abs(target - startVolume) < 0.005) {
+        audio.volume = target;
+        if (onComplete) onComplete();
+        return;
+      }
+
+      const interval = setInterval(() => {
+        const progress = Math.min(1, (Date.now() - startedAt) / duration);
+        audio.volume = Math.max(0, Math.min(1, startVolume + (target - startVolume) * progress));
+        if (progress >= 1) {
+          clearInterval(interval);
+          fadeIntervals.delete(audio);
+          if (onComplete) onComplete();
+        }
+      }, FADE_STEP_MS);
+      fadeIntervals.set(audio, interval);
+    }
+
+    function trackKeyForNode(nodeId) {
+      const id = String(nodeId || '');
+      if (id === 'prologue' || id.startsWith('prologue_')) return 'prologue';
+      const match = /^ch(\d{2})_/.exec(id);
+      if (!match) return activeKey || 'prologue';
+      const chapter = Number(match[1]);
+      if (chapter >= 1 && chapter <= 3) return 'ch1_3';
+      if (chapter >= 4 && chapter <= 6) return 'ch4_6';
+      if (chapter >= 7 && chapter <= 8) return 'ch7_8';
+      return activeKey || 'prologue';
+    }
+
+    function currentNodeForScreen() {
+      const storyScreen = document.getElementById('screen-story');
+      if (!storyScreen || !storyScreen.classList.contains('active')) return 'prologue_start';
+      try {
+        if (typeof state !== 'undefined' && state && state.currentNodeId) return state.currentNodeId;
+      } catch (_) { /* Состояние движка ещё не инициализировано. */ }
+      return 'prologue_start';
+    }
+
+    function playTrack(key) {
+      if (muted || !userGestureReceived) return;
+      const src = TRACKS[key] || TRACKS.prologue;
+      if (key === activeKey && activeChannel >= 0 && !channels[activeChannel].paused) {
+        fadeTo(channels[activeChannel], MAX_VOLUME, 250);
+        return;
+      }
+
+      const token = ++switchToken;
+      const nextChannelIndex = activeChannel === 0 ? 1 : 0;
+      const incoming = channels[nextChannelIndex];
+      const outgoing = activeChannel >= 0 ? channels[activeChannel] : null;
+
+      const incomingFade = fadeIntervals.get(incoming);
+      if (incomingFade) clearInterval(incomingFade);
+      // Защита от запоздавшего play()-promise при очень быстрых переходах.
+      incoming.__blackoutRequestToken = token;
+      incoming.pause();
+      incoming.volume = 0;
+      const absoluteSrc = new URL(src, document.baseURI).href;
+      if (incoming.src !== absoluteSrc) {
+        incoming.src = src;
+        incoming.load();
+      }
+
+      let playPromise;
+      try {
+        // play() вызывается непосредственно в цепочке пользовательского жеста.
+        playPromise = incoming.play();
+      } catch (error) {
+        console.warn('BLACKOUT: браузер отклонил запуск фоновой музыки.', error);
+        return;
+      }
+
+      Promise.resolve(playPromise).then(() => {
+        if (token !== switchToken || muted) {
+          if (incoming.__blackoutRequestToken === token) incoming.pause();
+          return;
+        }
+        activeChannel = nextChannelIndex;
+        activeKey = key;
+        audioUnavailable = false;
+        updateButton();
+        fadeTo(incoming, MAX_VOLUME, FADE_MS);
+        if (outgoing && outgoing !== incoming) {
+          fadeTo(outgoing, 0, FADE_MS, () => outgoing.pause());
+        }
+      }).catch((error) => {
+        audioUnavailable = true;
+        updateButton();
+        console.warn('BLACKOUT: фоновая музыка не запустилась. Проверьте наличие MP3 и разрешение браузера.', error);
+      });
+    }
+
+    function syncNode(nodeId) {
+      if (muted || !userGestureReceived) return;
+      playTrack(trackKeyForNode(nodeId));
+    }
+
+    function stopAll() {
+      ++switchToken;
+      channels.forEach((audio) => {
+        fadeTo(audio, 0, 420, () => audio.pause());
+      });
+    }
+
+    function unlockFromGesture(event) {
+      if (event && event.target && event.target.closest && event.target.closest('#bgm-toggle-btn')) return;
+      userGestureReceived = true;
+      if (!muted) playTrack(trackKeyForNode(currentNodeForScreen()));
+      document.removeEventListener('click', unlockFromGesture);
+    }
+
+    if (button) {
+      button.addEventListener('click', () => {
+        muted = !muted;
+        storeMutedPreference(muted);
+        updateButton();
+        if (muted) {
+          stopAll();
+        } else {
+          userGestureReceived = true;
+          playTrack(trackKeyForNode(currentNodeForScreen()));
+        }
+      });
+    }
+
+    // Первый клик, включая «Начать игру», «Продолжить» или выбор архетипа,
+    // разрешает запуск звука; сохранённое состояние «ВЫКЛ» всегда соблюдается.
+    document.addEventListener('click', unlockFromGesture);
+
+    window.BLACKOUT_MUSIC = Object.freeze({
+      syncNode,
+      setMuted(value) {
+        muted = Boolean(value);
+        storeMutedPreference(muted);
+        updateButton();
+        if (muted) stopAll();
+        else {
+          userGestureReceived = true;
+          playTrack(trackKeyForNode(currentNodeForScreen()));
+        }
+      },
+      getState() { return { muted, activeKey, audioUnavailable, userGestureReceived }; }
+    });
+
+    updateButton();
+  })();
+  </script>
+
 </body>
 </html>
